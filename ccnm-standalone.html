@@ -1,0 +1,1231 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CCNM - Critical Care Nutrition Monitor</title>
+<meta name="description" content="Monitoring and evaluation of nutrition care, medication and parenteral nutrition in critical care and renal units. Not a diagnostic tool.">
+<style>
+:root{
+  --bg:#f4f6f8;--card:#fff;--text:#1b2733;--muted:#5d6b7a;--line:#dde3ea;
+  --brand:#0f766e;--brand-ink:#fff;--high:#b42318;--high-bg:#fdeceb;--warn:#a15c07;--warn-bg:#fff4dc;
+  --info:#1d4f91;--info-bg:#e8f1fc;--ok:#157347;--ok-bg:#e6f4ec;--radius:10px;
+}
+@media (prefers-color-scheme:dark){
+  :root{--bg:#10161c;--card:#18212a;--text:#e6edf3;--muted:#93a1b0;--line:#2a3745;
+    --brand:#2dd4bf;--brand-ink:#06201d;--high:#ff8b82;--high-bg:#3a1d1b;--warn:#f5c15a;--warn-bg:#35290f;
+    --info:#8ab8f5;--info-bg:#162a44;--ok:#6fd49a;--ok-bg:#12301f}
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+h2,h3,h4{margin:0 0 .5rem}h2 small{color:var(--muted);font-weight:400}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:.75rem;padding:.6rem 1rem;background:var(--card);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5;flex-wrap:wrap}
+.brand{display:flex;gap:.6rem;align-items:center}.brand small{display:block;color:var(--muted);font-size:.75rem}
+.logo{display:grid;place-items:center;width:34px;height:34px;border-radius:8px;background:var(--brand);color:var(--brand-ink);font-weight:700}
+nav{display:flex;gap:.25rem}
+nav button{background:none;border:0;padding:.45rem .8rem;border-radius:8px;color:var(--text);font:inherit;cursor:pointer}
+nav button.on{background:var(--brand);color:var(--brand-ink)}
+.banner{background:var(--warn-bg);color:var(--warn);padding:.35rem 1rem;font-size:.8rem;text-align:center}
+main{max-width:1180px;margin:0 auto;padding:1rem}
+.toolbar{display:flex;justify-content:space-between;align-items:center;gap:.75rem;flex-wrap:wrap;margin-bottom:.75rem}
+.tools{display:flex;gap:.5rem;flex-wrap:wrap}
+input,select,textarea{font:inherit;color:var(--text);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:.45rem .55rem;width:100%}
+.tools input,.tools select{width:auto}
+input:focus,select:focus,textarea:focus,button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--brand);outline-offset:1px}
+.btn{font:inherit;background:var(--card);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:.45rem .8rem;cursor:pointer}
+.btn:hover{border-color:var(--brand)}
+.btn.primary{background:var(--brand);color:var(--brand-ink);border-color:var(--brand);font-weight:600}
+.btn.danger{color:var(--high)}.btn.sm{padding:.2rem .5rem;font-size:.8rem}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:.75rem}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:.9rem;min-width:0}
+.card h3{font-size:1rem}.card h4{font-size:.85rem;color:var(--muted);text-transform:uppercase;letter-spacing:.03em}
+.pcard{cursor:pointer}.pcard:hover{border-color:var(--brand)}
+.pcard .row{display:flex;justify-content:space-between;gap:.5rem;align-items:baseline}
+.muted{color:var(--muted)}.small{font-size:.82rem}
+.chip{display:inline-block;padding:.05rem .5rem;border-radius:99px;font-size:.75rem;background:var(--info-bg);color:var(--info);margin-right:.25rem}
+.chip.high{background:var(--high-bg);color:var(--high)}.chip.warn{background:var(--warn-bg);color:var(--warn)}.chip.ok{background:var(--ok-bg);color:var(--ok)}
+.phead{display:flex;justify-content:space-between;gap:.75rem;flex-wrap:wrap;align-items:flex-start;margin-bottom:.5rem}
+.tabs{display:flex;gap:.25rem;overflow-x:auto;border-bottom:1px solid var(--line);margin:.5rem 0 1rem}
+.tabs button{background:none;border:0;border-bottom:3px solid transparent;padding:.55rem .8rem;font:inherit;color:var(--muted);cursor:pointer;white-space:nowrap}
+.tabs button.on{color:var(--text);border-bottom-color:var(--brand);font-weight:600}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:.75rem;margin-bottom:.75rem}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:.75rem;margin-bottom:.75rem}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:.2rem .8rem}.kv dt{color:var(--muted)}.kv dd{margin:0;text-align:right;font-variant-numeric:tabular-nums}
+.alerts{list-style:none;margin:0;padding:0;display:grid;gap:.4rem}
+.alerts li{padding:.45rem .65rem;border-radius:8px;border-left:4px solid;font-size:.9rem}
+.alerts .high{background:var(--high-bg);border-color:var(--high)}.alerts .warn{background:var(--warn-bg);border-color:var(--warn)}.alerts .info{background:var(--info-bg);border-color:var(--info)}
+.bar{height:9px;background:var(--line);border-radius:99px;overflow:hidden;margin:.15rem 0 .5rem}
+.bar i{display:block;height:100%;background:var(--ok)}.bar.low i{background:var(--high)}.bar.mid i{background:var(--warn)}.bar.over i{background:var(--info)}
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--radius);background:var(--card)}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
+th,td{padding:.4rem .6rem;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap;font-size:.88rem}
+th{color:var(--muted);font-weight:600;font-size:.76rem;text-transform:uppercase;letter-spacing:.02em;background:var(--bg)}
+td.num,th.num{text-align:right}tr:last-child td{border-bottom:0}
+td.low{color:var(--high);font-weight:700}td.high{color:var(--high);font-weight:700}
+td.wrap{white-space:normal;min-width:180px}
+.chart{width:100%;height:auto;display:block}.chart .axis{stroke:var(--line)}.chart .tick{fill:var(--muted);font-size:10px}
+.chart .grid{stroke:var(--line);stroke-dasharray:2 3}.chart .ref{stroke:var(--warn);stroke-dasharray:5 4}.chart .reflabel{fill:var(--warn);font-size:9px}
+.chart .band{fill:var(--ok);opacity:.12}.chart .tgt{stroke:var(--ok);stroke-width:1.5;stroke-dasharray:6 3}
+.legend{display:flex;gap:.8rem;flex-wrap:wrap;font-size:.78rem;color:var(--muted);margin-top:.3rem}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:.25rem;vertical-align:-1px}
+.empty{padding:1.2rem;text-align:center;color:var(--muted);font-size:.9rem}
+dialog{border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--text);width:min(640px,94vw);padding:1rem 1.1rem;max-height:92vh}
+dialog::backdrop{background:rgba(0,0,0,.5)}
+.fgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:.6rem}
+.field{display:flex;flex-direction:column;gap:.15rem;font-size:.82rem;color:var(--muted)}.field.full{grid-column:1/-1}.field em{font-style:normal;opacity:.8}
+.actions{display:flex;justify-content:flex-end;gap:.5rem;margin-top:1rem}
+.sectionhead{display:flex;justify-content:space-between;align-items:center;gap:.5rem;margin:.9rem 0 .4rem;flex-wrap:wrap}
+.sectionhead h3{margin:0}
+.note{border-left:3px solid var(--brand);padding:.3rem .7rem;margin:.4rem 0;background:var(--card);border-radius:0 8px 8px 0}
+#toast{position:fixed;left:50%;bottom:1rem;transform:translateX(-50%);background:var(--text);color:var(--bg);padding:.5rem .9rem;border-radius:8px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:20;font-size:.9rem}
+#toast.show{opacity:1}
+.printonly{display:none}
+@media (max-width:600px){main{padding:.6rem}.topbar{padding:.5rem .6rem}th,td{padding:.35rem .45rem}}
+@media print{
+  body{background:#fff;color:#000}.topbar,.banner,.tabs,.btn,.noprint,#toast{display:none!important}
+  .card,.tablewrap{border-color:#999;break-inside:avoid}.printonly{display:block}main{max-width:none;padding:0}
+}
+
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="brand"><span class="logo">N</span><div><strong>CCNM</strong><small>Critical Care Nutrition Monitor</small></div></div>
+  <nav>
+    <button data-action="nav" data-view="patients">Patients</button>
+    <button data-action="nav" data-view="settings">Settings</button>
+    <button data-action="nav" data-view="about">About</button>
+  </nav>
+</header>
+<div class="banner">Monitoring &amp; evaluation aid only &mdash; not for diagnosis or treatment decisions. Data is stored in this browser only; use pseudonymised IDs.</div>
+<main id="app"></main>
+<dialog id="dlg"></dialog>
+<div id="toast" role="status" aria-live="polite"></div>
+<script>
+/*
+ * CCNM calculation core. Pure functions, no DOM access.
+ * Works in the browser (window.Calc) and in Node (require).
+ * All reference ranges are editable defaults - confirm against local protocols.
+ */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) module.exports = factory();
+  else root.Calc = factory();
+}(typeof self !== 'undefined' ? self : this, function () {
+  'use strict';
+
+  const LIPID_KCAL_PER_ML = { 10: 1.1, 20: 2.0, 30: 3.0 };
+  const PROPOFOL_KCAL_PER_ML = 1.1;
+
+  // SI units throughout (mmol/L, umol/L, g/L).
+  const DEFAULT_SETTINGS = {
+    kHigh: 5.5, kLow: 3.5, naLow: 130, naHigh: 150,
+    phosLow: 0.65, mgLow: 0.5, glucHigh: 10, tgHigh: 4.5,
+    girMax: 5, lipidMax: 1.5, periphOsmMax: 900,
+    lowIntakePct: 60, highIntakePct: 110, labStaleDays: 2
+  };
+
+  const PRESETS = {
+    icu_acute:    { label: 'ICU - acute phase',            kcalMin: 20, kcalMax: 25, protMin: 1.2,  protMax: 2.0 },
+    icu_recovery: { label: 'ICU - recovery / ongoing',     kcalMin: 25, kcalMax: 30, protMin: 1.2,  protMax: 2.0 },
+    general:      { label: 'General ward / HDU',           kcalMin: 25, kcalMax: 30, protMin: 1.0,  protMax: 1.2 },
+    aki:          { label: 'AKI - no RRT',                 kcalMin: 20, kcalMax: 30, protMin: 0.8,  protMax: 1.0 },
+    aki_rrt:      { label: 'AKI - intermittent RRT',       kcalMin: 20, kcalMax: 30, protMin: 1.0,  protMax: 1.5 },
+    crrt:         { label: 'CRRT / SLED',                  kcalMin: 20, kcalMax: 30, protMin: 1.5,  protMax: 2.5 },
+    ckd:          { label: 'CKD 3-5 (not on dialysis)',    kcalMin: 25, kcalMax: 35, protMin: 0.55, protMax: 0.8 },
+    hd:           { label: 'Maintenance haemodialysis',    kcalMin: 25, kcalMax: 35, protMin: 1.0,  protMax: 1.2 },
+    pd:           { label: 'Peritoneal dialysis',          kcalMin: 25, kcalMax: 35, protMin: 1.0,  protMax: 1.2 },
+    custom:       { label: 'Custom',                       kcalMin: 25, kcalMax: 30, protMin: 1.0,  protMax: 1.5 }
+  };
+
+  const LAB_DEFS = [
+    { key: 'na',    label: 'Na',        unit: 'mmol/L' },
+    { key: 'k',     label: 'K',         unit: 'mmol/L' },
+    { key: 'hco3',  label: 'HCO3',      unit: 'mmol/L' },
+    { key: 'urea',  label: 'Urea',      unit: 'mmol/L' },
+    { key: 'creat', label: 'Creatinine', unit: 'umol/L' },
+    { key: 'ca',    label: 'Ca (adj)',  unit: 'mmol/L' },
+    { key: 'mg',    label: 'Mg',        unit: 'mmol/L' },
+    { key: 'phos',  label: 'Phosphate', unit: 'mmol/L' },
+    { key: 'gluc',  label: 'Glucose',   unit: 'mmol/L' },
+    { key: 'tg',    label: 'Triglycerides', unit: 'mmol/L' },
+    { key: 'crp',   label: 'CRP',       unit: 'mg/L' },
+    { key: 'alb',   label: 'Albumin',   unit: 'g/L' },
+    { key: 'alt',   label: 'ALT',       unit: 'U/L' }
+  ];
+
+  const n = v => { if (v === '' || v == null) return null; const x = Number(v); return Number.isFinite(x) ? x : null; };
+  const z = v => n(v) || 0;
+
+  function todayStr(d) {
+    d = d || new Date();
+    const p = x => String(x).padStart(2, '0');
+    return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate());
+  }
+  function dayDiff(a, b) {
+    return Math.round((Date.parse(b + 'T00:00:00Z') - Date.parse(a + 'T00:00:00Z')) / 864e5);
+  }
+  function sortAsc(arr, key) {
+    key = key || 'date';
+    return (arr || []).slice().sort((a, b) => String(a[key] || '').localeCompare(String(b[key] || '')));
+  }
+
+  // ---------- anthropometry ----------
+  function bmi(kg, cm) { kg = n(kg); cm = n(cm); if (!kg || !cm) return null; const m = cm / 100; return kg / (m * m); }
+  function idealWeight(cm, sex) { // Devine
+    const inches = n(cm) / 2.54, over = Math.max(0, inches - 60);
+    return (sex === 'F' ? 45.5 : 50) + 2.3 * over;
+  }
+  function adjustedWeight(actual, ideal) { return ideal + 0.25 * (actual - ideal); }
+
+  function latestWeight(p) {
+    const w = sortAsc(p.weights).filter(x => n(x.weightKg) != null);
+    return w.length ? { date: w[w.length - 1].date, weightKg: n(w[w.length - 1].weightKg), method: w[w.length - 1].method } : null;
+  }
+
+  function dosingWeight(p) {
+    const lw = latestWeight(p); if (!lw) return null;
+    const actual = lw.weightKg, h = n(p.heightCm);
+    const basis = (p.targets && p.targets.weightBasis) || 'auto';
+    const ibw = h ? idealWeight(h, p.sex) : null;
+    const b = h ? bmi(actual, h) : null;
+    const adj = ibw != null ? adjustedWeight(actual, ibw) : null;
+    let use = 'actual', kg = actual;
+    if (basis === 'ideal' && ibw != null) { use = 'ideal'; kg = ibw; }
+    else if (basis === 'adjusted' && adj != null) { use = 'adjusted'; kg = adj; }
+    else if (basis === 'auto' && b != null && b >= 30 && adj != null) { use = 'adjusted'; kg = adj; }
+    return { kg, basis: use, actual, ibw, adj, bmi: b, date: lw.date };
+  }
+
+  // ---------- targets ----------
+  function targetsFor(p) {
+    const t = p.targets || {};
+    const key = PRESETS[t.preset] ? t.preset : 'icu_acute';
+    const pr = PRESETS[key];
+    const pick = (a, b) => n(a) != null ? n(a) : b;
+    const kcalMin = pick(t.kcalMin, pr.kcalMin), kcalMax = pick(t.kcalMax, pr.kcalMax);
+    const protMin = pick(t.protMin, pr.protMin), protMax = pick(t.protMax, pr.protMax);
+    const dw = dosingWeight(p), wt = dw ? dw.kg : null;
+    const res = {
+      preset: key, presetLabel: pr.label, weightKg: wt, weightBasis: dw ? dw.basis : null,
+      kcalPerKgMin: kcalMin, kcalPerKgMax: kcalMax, protPerKgMin: protMin, protPerKgMax: protMax,
+      fluidLimit: n(t.fluidLimit),
+      kcalMin: null, kcalMax: null, kcalTarget: null, protMin: null, protMax: null, protTarget: null
+    };
+    if (wt) {
+      res.kcalMin = kcalMin * wt; res.kcalMax = kcalMax * wt; res.kcalTarget = (res.kcalMin + res.kcalMax) / 2;
+      res.protMin = protMin * wt; res.protMax = protMax * wt; res.protTarget = (res.protMin + res.protMax) / 2;
+    }
+    return res;
+  }
+
+  // ---------- intake ----------
+  function intakeTotals(e) {
+    const oral = z(e.oralKcal), en = z(e.enKcal), pn = z(e.pnKcal);
+    const propofol = z(e.propofolMl) * PROPOFOL_KCAL_PER_ML, other = z(e.otherKcal);
+    const nutrition = oral + en + pn;
+    const out = z(e.urineOut) + z(e.otherOut);
+    return {
+      oral, en, pn, propofol, other, nutrition, total: nutrition + propofol + other,
+      protOral: z(e.oralProt), protEn: z(e.enProt), protPn: z(e.pnProt),
+      protein: z(e.oralProt) + z(e.enProt) + z(e.pnProt),
+      fluidIn: z(e.fluidIn), fluidOut: out, balance: z(e.fluidIn) - out
+    };
+  }
+  function adequacy(p, e) {
+    const T = targetsFor(p); if (!T.kcalTarget) return null;
+    const t = intakeTotals(e);
+    return { kcalPct: t.total / T.kcalTarget * 100, protPct: t.protein / T.protTarget * 100 };
+  }
+
+  // ---------- parenteral nutrition ----------
+  function pnCalc(o, wt) {
+    wt = n(wt);
+    const dex = z(o.dextroseG), aa = z(o.aminoAcidG), lipMl = z(o.lipidMl), vol = z(o.volumeMl);
+    const conc = n(o.lipidConc) || 20;
+    const lipG = lipMl * conc / 100;
+    const lipKcal = lipMl * (LIPID_KCAL_PER_ML[conc] || 2);
+    const dexKcal = dex * 3.4, aaKcal = aa * 4;
+    const npKcal = dexKcal + lipKcal, totalKcal = npKcal + aaKcal;
+    const nitrogen = aa / 6.25;
+    const aio = String(o.lipidMode || '').toLowerCase().indexOf('all') === 0 || String(o.lipidMode || '') === '3-in-1';
+    const aqueousL = Math.max(0, (aio ? vol - lipMl : vol)) / 1000;
+    const na = z(o.na), k = z(o.k), ca = z(o.ca), mg = z(o.mg);
+    const mEq = na + k + 2 * (ca + mg);
+    const osm = aqueousL > 0 ? (dex * 5 + aa * 10 + mEq * 2) / aqueousL : null; // rough estimate
+    return {
+      dexKcal, aaKcal, lipKcal, npKcal, totalKcal, lipidG: lipG, nitrogen,
+      npcN: nitrogen > 0 ? npKcal / nitrogen : null,
+      kcalPerKg: wt ? totalKcal / wt : null,
+      protPerKg: wt ? aa / wt : null,
+      girMgKgMin: wt ? dex * 1000 / 1440 / wt : null,
+      lipidGperKg: wt ? lipG / wt : null,
+      volPerKg: wt && vol ? vol / wt : null,
+      kcalPerMl: vol ? totalKcal / vol : null,
+      osm
+    };
+  }
+
+  // ---------- screening ----------
+  function must(o) {
+    const b = n(o.bmi), w = n(o.weightLossPct);
+    if (b == null || w == null) return { complete: false };
+    const bmiScore = b > 20 ? 0 : b >= 18.5 ? 1 : 2;
+    const wlScore = w < 5 ? 0 : w <= 10 ? 1 : 2;
+    const acuteScore = o.acuteNoIntake ? 2 : 0;
+    const total = bmiScore + wlScore + acuteScore;
+    return { complete: true, bmiScore, wlScore, acuteScore, total, risk: total < 1 ? 'Low' : total === 1 ? 'Medium' : 'High' };
+  }
+
+  // ---------- labs ----------
+  function flagFor(key, v, S) {
+    S = Object.assign({}, DEFAULT_SETTINGS, S || {}); v = n(v); if (v == null) return '';
+    if (key === 'na') return v < S.naLow ? 'low' : v > S.naHigh ? 'high' : '';
+    if (key === 'k') return v < S.kLow ? 'low' : v > S.kHigh ? 'high' : '';
+    if (key === 'mg') return v < S.mgLow ? 'low' : '';
+    if (key === 'phos') return v < S.phosLow ? 'low' : '';
+    if (key === 'gluc') return v > S.glucHigh ? 'high' : '';
+    if (key === 'tg') return v > S.tgHigh ? 'high' : '';
+    return '';
+  }
+  function latestLab(labs, key) {
+    const s = sortAsc(labs);
+    for (let i = s.length - 1; i >= 0; i--) { const v = n(s[i][key]); if (v != null) return { date: s[i].date, value: v }; }
+    return null;
+  }
+  const labLabel = key => (LAB_DEFS.find(l => l.key === key) || { label: key }).label;
+
+  // ---------- rule-based flags (monitoring prompts, not diagnoses) ----------
+  function evaluateAlerts(p, settings, today) {
+    const S = Object.assign({}, DEFAULT_SETTINGS, settings || {});
+    today = today || todayStr();
+    const out = [];
+    const add = (level, text) => out.push({ level, text });
+    const intake = sortAsc(p.intake), tpn = sortAsc(p.tpn), weights = sortAsc(p.weights);
+    const T = targetsFor(p);
+    const pct = (e, k) => { const a = adequacy(p, e); return a ? a[k] : null; };
+
+    // intake
+    const last = intake[intake.length - 1];
+    if (!last) add('info', 'No intake logged yet.');
+    else if (dayDiff(last.date, today) > 2) add('info', 'No intake logged in the last 2 days (last entry ' + last.date + ').');
+    const rec = intake.slice(-3);
+    if (rec.length === 3 && dayDiff(rec[0].date, today) <= 6) {
+      if (rec.every(e => { const v = pct(e, 'kcalPct'); return v != null && v < S.lowIntakePct; }))
+        add('warn', 'Energy delivery below ' + S.lowIntakePct + '% of target on the last 3 logged days.');
+      if (rec.every(e => { const v = pct(e, 'protPct'); return v != null && v < S.lowIntakePct; }))
+        add('warn', 'Protein delivery below ' + S.lowIntakePct + '% of target on the last 3 logged days.');
+    }
+    if (last && dayDiff(last.date, today) <= 2) {
+      const kp = pct(last, 'kcalPct');
+      if (kp != null && kp > S.highIntakePct) add('warn', 'Energy on ' + last.date + ' was ' + Math.round(kp) + '% of target (above ' + S.highIntakePct + '%).');
+      const t = intakeTotals(last);
+      if (T.fluidLimit && t.fluidIn > T.fluidLimit) add('warn', 'Fluid intake on ' + last.date + ' (' + Math.round(t.fluidIn) + ' mL) exceeded the set limit of ' + T.fluidLimit + ' mL.');
+    }
+
+    // labs
+    const recentLab = (key, maxDays) => { const l = latestLab(p.labs, key); return l && dayDiff(l.date, today) <= (maxDays || 14) ? l : null; };
+    const k = recentLab('k'), ph = recentLab('phos'), mg = recentLab('mg'), na = recentLab('na'), gl = recentLab('gluc'), tg = recentLab('tg');
+    const first = intake.find(e => intakeTotals(e).nutrition > 0);
+    const refeedWindow = first && dayDiff(first.date, today) <= 7;
+    const lowK = k && k.value < S.kLow, lowP = ph && ph.value < S.phosLow, lowM = mg && mg.value < S.mgLow;
+    if (refeedWindow && (lowK || lowP || lowM)) {
+      const parts = [];
+      if (lowP) parts.push('phosphate ' + ph.value);
+      if (lowK) parts.push('potassium ' + k.value);
+      if (lowM) parts.push('magnesium ' + mg.value);
+      add('high', 'Low ' + parts.join(', ') + ' within 7 days of starting nutrition - review for refeeding-type electrolyte shifts per local protocol.');
+    } else {
+      if (lowP) add('warn', 'Phosphate low (' + ph.value + ' mmol/L on ' + ph.date + ').');
+      if (lowK) add('warn', 'Potassium low (' + k.value + ' mmol/L on ' + k.date + ').');
+      if (lowM) add('warn', 'Magnesium low (' + mg.value + ' mmol/L on ' + mg.date + ').');
+    }
+    if (k && k.value > S.kHigh) add('high', 'Potassium high (' + k.value + ' mmol/L on ' + k.date + ').');
+    if (na && (na.value < S.naLow || na.value > S.naHigh)) add('warn', 'Sodium outside ' + S.naLow + '-' + S.naHigh + ' (' + na.value + ' mmol/L on ' + na.date + ').');
+    if (gl && gl.value > S.glucHigh) add('warn', 'Glucose above ' + S.glucHigh + ' mmol/L (' + gl.value + ' on ' + gl.date + ').');
+
+    // lipid exposure
+    const lastPn = tpn[tpn.length - 1];
+    const pnActive = !!(lastPn && dayDiff(lastPn.date, today) <= 2);
+    const onLipid = (pnActive && z(lastPn.lipidMl) > 0) || (last && dayDiff(last.date, today) <= 2 && z(last.propofolMl) > 0);
+    if (tg && tg.value > S.tgHigh) add(onLipid ? 'high' : 'warn', 'Triglycerides high (' + tg.value + ' mmol/L on ' + tg.date + ')' + (onLipid ? ' while receiving lipid (PN/propofol).' : '.'));
+    if (onLipid && !recentLab('tg', 7)) add('info', 'Receiving lipid (PN/propofol): no triglyceride result in the last 7 days.');
+
+    // PN checks
+    if (pnActive) {
+      const dw = dosingWeight(p), c = pnCalc(lastPn, dw ? dw.kg : null);
+      if (c.girMgKgMin != null && c.girMgKgMin > S.girMax) add('warn', 'PN glucose infusion rate ' + c.girMgKgMin.toFixed(1) + ' mg/kg/min exceeds ' + S.girMax + '.');
+      if (c.lipidGperKg != null && c.lipidGperKg > S.lipidMax) add('warn', 'PN lipid ' + c.lipidGperKg.toFixed(2) + ' g/kg/day exceeds ' + S.lipidMax + '.');
+      if (lastPn.access === 'Peripheral' && c.osm != null && c.osm > S.periphOsmMax) add('high', 'Peripheral PN estimated osmolarity ' + Math.round(c.osm) + ' mOsm/L exceeds ' + S.periphOsmMax + '.');
+      const stale = ['k', 'phos', 'mg', 'gluc'].filter(key => { const l = latestLab(p.labs, key); return !l || dayDiff(l.date, today) > S.labStaleDays; });
+      if (stale.length) add('info', 'PN active: ' + stale.map(labLabel).join(', ') + ' not measured in the last ' + S.labStaleDays + ' days.');
+    }
+
+    // weight
+    if (weights.length >= 2) {
+      const a = weights[weights.length - 2], b = weights[weights.length - 1];
+      if (n(a.weightKg) && n(b.weightKg) && dayDiff(a.date, b.date) > 0 && dayDiff(a.date, b.date) <= 3) {
+        const ch = (b.weightKg - a.weightKg) / a.weightKg * 100;
+        if (Math.abs(ch) >= 3) add('info', 'Weight changed ' + (ch > 0 ? '+' : '') + ch.toFixed(1) + '% in ' + dayDiff(a.date, b.date) + ' day(s) - likely fluid shift; interpret with fluid balance.');
+      }
+    }
+
+    const order = { high: 0, warn: 1, info: 2 };
+    return out.sort((x, y) => order[x.level] - order[y.level]);
+  }
+
+  return {
+    PRESETS, LAB_DEFS, DEFAULT_SETTINGS, LIPID_KCAL_PER_ML, PROPOFOL_KCAL_PER_ML,
+    n, todayStr, dayDiff, sortAsc, bmi, idealWeight, adjustedWeight, latestWeight, dosingWeight,
+    targetsFor, intakeTotals, adequacy, pnCalc, must, flagFor, latestLab, labLabel, evaluateAlerts
+  };
+}));
+
+</script>
+<script>
+/* CCNM storage layer: everything lives in the browser's localStorage. */
+(function (root) {
+  'use strict';
+  const C = root.Calc;
+  const KEY = 'ccnm.v1';
+
+  const Store = {
+    data: null,
+
+    load() {
+      let d = null;
+      try { const raw = root.localStorage.getItem(KEY); d = raw ? JSON.parse(raw) : null; } catch (e) { d = null; }
+      if (!d || !Array.isArray(d.patients)) d = { version: 1, patients: [], settings: {} };
+      d.settings = Object.assign({}, C.DEFAULT_SETTINGS, d.settings || {});
+      this.data = d;
+      return d;
+    },
+
+    save() {
+      try { root.localStorage.setItem(KEY, JSON.stringify(this.data)); return true; }
+      catch (e) { return false; }
+    },
+
+    uid() { return Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4); },
+
+    patient(id) { return this.data.patients.find(p => p.id === id) || null; },
+
+    newPatientShell(o) {
+      return Object.assign({
+        id: this.uid(), mrn: '', name: '', unit: 'ICU', age: null, sex: 'M', heightCm: null,
+        admitDate: C.todayStr(), dialysis: 'None', allergies: '', context: '',
+        targets: { preset: 'icu_acute' },
+        weights: [], intake: [], labs: [], meds: [], tpn: [], notes: []
+      }, o || {});
+    },
+
+    addPatient(o) { const p = this.newPatientShell(o); this.data.patients.push(p); this.save(); return p; },
+
+    removePatient(id) { this.data.patients = this.data.patients.filter(p => p.id !== id); this.save(); },
+
+    /** Insert or replace a record in one of a patient's collections. Intake and PN are unique per date. */
+    upsert(p, coll, rec) {
+      const list = p[coll];
+      if (!rec.id) {
+        if (coll === 'intake' || coll === 'tpn') {
+          const ex = list.find(x => x.date === rec.date);
+          if (ex) rec.id = ex.id;
+        }
+      }
+      if (rec.id) {
+        const i = list.findIndex(x => x.id === rec.id);
+        if (i >= 0) { list[i] = Object.assign({}, list[i], rec); this.save(); return list[i]; }
+      }
+      rec.id = rec.id || this.uid();
+      list.push(rec);
+      this.save();
+      return rec;
+    },
+
+    removeChild(p, coll, id) { p[coll] = p[coll].filter(x => x.id !== id); this.save(); },
+
+    exportJson() { return JSON.stringify(this.data, null, 2); },
+
+    importJson(text) {
+      const d = JSON.parse(text);
+      if (!d || !Array.isArray(d.patients)) throw new Error('Not a CCNM export file.');
+      d.settings = Object.assign({}, C.DEFAULT_SETTINGS, d.settings || {});
+      this.data = d;
+      this.save();
+    },
+
+    wipe() { this.data = { version: 1, patients: [], settings: Object.assign({}, C.DEFAULT_SETTINGS) }; this.save(); }
+  };
+
+  root.Store = Store;
+})(typeof self !== 'undefined' ? self : this);
+
+</script>
+<script>
+/* Tiny dependency-free SVG charts. */
+(function (root) {
+  'use strict';
+
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const EMPTY = '<div class="empty">No data to chart yet.</div>';
+
+  function niceStep(x) {
+    const p = Math.pow(10, Math.floor(Math.log10(x))), f = x / p;
+    return (f <= 1 ? 1 : f <= 2 ? 2 : f <= 5 ? 5 : 10) * p;
+  }
+  function scale(min, max, ticks) {
+    if (min === max) { min -= 1; max += 1; }
+    const step = niceStep((max - min) / ticks);
+    return { lo: Math.floor(min / step) * step, hi: Math.ceil(max / step) * step, step };
+  }
+  const tickFmt = v => Math.abs(v) >= 100 ? String(Math.round(v)) : String(+v.toFixed(2));
+  const shortDate = d => String(d).slice(5);
+
+  function yAxis(sc, m, W, H, Y) {
+    let s = '';
+    for (let v = sc.lo; v <= sc.hi + sc.step / 1e6; v += sc.step) {
+      s += `<line class="grid" x1="${m.l}" x2="${W - m.r}" y1="${Y(v)}" y2="${Y(v)}"/>` +
+           `<text class="tick" x="${m.l - 6}" y="${Y(v) + 3}" text-anchor="end">${tickFmt(v)}</text>`;
+    }
+    return s + `<line class="axis" x1="${m.l}" x2="${m.l}" y1="${m.t}" y2="${H - m.b}"/><line class="axis" x1="${m.l}" x2="${W - m.r}" y1="${H - m.b}" y2="${H - m.b}"/>`;
+  }
+
+  function lineChart(series, opt) {
+    opt = opt || {};
+    const W = 640, H = opt.height || 210, m = { l: 44, r: 14, t: 12, b: 26 }, pw = W - m.l - m.r, ph = H - m.t - m.b;
+    const clean = series.map(s => ({ name: s.name, color: s.color, points: s.points.filter(p => p.y != null && Number.isFinite(p.y)) }));
+    const pts = clean.flatMap(s => s.points);
+    if (!pts.length) return EMPTY;
+    const refs = opt.refs || [];
+    const ts = pts.map(p => Date.parse(p.x + 'T00:00:00Z'));
+    let t0 = Math.min.apply(null, ts), t1 = Math.max.apply(null, ts);
+    if (t0 === t1) { t0 -= 864e5; t1 += 864e5; }
+    const ys = pts.map(p => p.y).concat(refs.map(r => r.y));
+    const sc = scale(Math.min.apply(null, ys), Math.max.apply(null, ys), 4);
+    const X = t => m.l + (t - t0) / (t1 - t0) * pw;
+    const Y = v => m.t + ph - (v - sc.lo) / (sc.hi - sc.lo) * ph;
+    let svg = yAxis(sc, m, W, H, Y);
+    const dates = Array.from(new Set(pts.map(p => p.x))).sort();
+    const want = Math.min(dates.length, 5);
+    for (let i = 0; i < want; i++) {
+      const d = dates[want === 1 ? 0 : Math.round(i * (dates.length - 1) / (want - 1))];
+      svg += `<text class="tick" x="${X(Date.parse(d + 'T00:00:00Z'))}" y="${H - 8}" text-anchor="middle">${shortDate(d)}</text>`;
+    }
+    refs.forEach(r => {
+      svg += `<line class="ref" x1="${m.l}" x2="${W - m.r}" y1="${Y(r.y)}" y2="${Y(r.y)}"/><text class="reflabel" x="${W - m.r - 2}" y="${Y(r.y) - 3}" text-anchor="end">${esc(r.label || r.y)}</text>`;
+    });
+    clean.forEach(s => {
+      const sp = s.points.slice().sort((a, b) => a.x.localeCompare(b.x));
+      const c = s.color || '#0f766e';
+      if (sp.length > 1) svg += `<path d="${sp.map((p, i) => (i ? 'L' : 'M') + X(Date.parse(p.x + 'T00:00:00Z')).toFixed(1) + ' ' + Y(p.y).toFixed(1)).join(' ')}" fill="none" stroke="${c}" stroke-width="2"/>`;
+      sp.forEach(p => { svg += `<circle cx="${X(Date.parse(p.x + 'T00:00:00Z')).toFixed(1)}" cy="${Y(p.y).toFixed(1)}" r="3.2" fill="${c}"><title>${esc(p.x)}: ${p.y}</title></circle>`; });
+    });
+    return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(opt.label || 'Line chart')}">${svg}</svg>`;
+  }
+
+  /** days: [{label, parts:[{name,color,value}]}]; opt.target: {min,max,mid} */
+  function stackedBars(days, opt) {
+    opt = opt || {};
+    if (!days.length) return EMPTY;
+    const W = 640, H = opt.height || 220, m = { l: 44, r: 14, t: 12, b: 26 }, pw = W - m.l - m.r, ph = H - m.t - m.b;
+    const tg = opt.target || {};
+    const totals = days.map(d => d.parts.reduce((a, p) => a + p.value, 0));
+    const ymax = Math.max.apply(null, totals.concat([tg.max || 0, tg.mid || 0, 1])) * 1.08;
+    const sc = scale(0, ymax, 4);
+    const Y = v => m.t + ph - (v - sc.lo) / (sc.hi - sc.lo) * ph;
+    let svg = yAxis(sc, m, W, H, Y);
+    if (tg.min && tg.max) svg += `<rect class="band" x="${m.l}" y="${Y(tg.max)}" width="${pw}" height="${Math.max(0, Y(tg.min) - Y(tg.max))}"/>`;
+    const slot = pw / days.length, bw = Math.min(46, slot * 0.66);
+    days.forEach((d, i) => {
+      const x = m.l + slot * i + (slot - bw) / 2;
+      let acc = 0;
+      d.parts.forEach(p => {
+        if (p.value <= 0) return;
+        const y1 = Y(acc + p.value), y0 = Y(acc);
+        svg += `<rect x="${x.toFixed(1)}" y="${y1.toFixed(1)}" width="${bw.toFixed(1)}" height="${(y0 - y1).toFixed(1)}" fill="${p.color}"><title>${esc(d.label)} ${esc(p.name)}: ${Math.round(p.value)}</title></rect>`;
+        acc += p.value;
+      });
+      svg += `<text class="tick" x="${(x + bw / 2).toFixed(1)}" y="${H - 8}" text-anchor="middle">${shortDate(d.label)}</text>`;
+    });
+    if (tg.mid) svg += `<line class="tgt" x1="${m.l}" x2="${W - m.r}" y1="${Y(tg.mid)}" y2="${Y(tg.mid)}"/>`;
+    return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(opt.label || 'Stacked bar chart')}">${svg}</svg>`;
+  }
+
+  function legend(items) {
+    return '<div class="legend">' + items.map(i => `<span><i style="background:${i.color}"></i>${esc(i.name)}</span>`).join('') + '</div>';
+  }
+
+  root.Charts = { lineChart, stackedBars, legend };
+})(typeof self !== 'undefined' ? self : this);
+
+</script>
+<script>
+/* Synthetic demo patients. Entirely fictional - for trying the app only. */
+(function (root) {
+  'use strict';
+  const C = root.Calc;
+
+  function addDays(s, d) {
+    const t = new Date(s + 'T00:00:00Z'); t.setUTCDate(t.getUTCDate() + d); return t.toISOString().slice(0, 10);
+  }
+
+  function build(today, uid) {
+    const D = i => addDays(today, -i);
+    const rec = o => Object.assign({ id: uid() }, o);
+    const shell = o => Object.assign({ id: uid(), allergies: '', context: '', weights: [], intake: [], labs: [], meds: [], tpn: [], notes: [] }, o);
+
+    // ---- 1. ICU patient: enteral feeding with a short PN bridge ----
+    const icu = shell({
+      mrn: 'DEMO-ICU-04', name: 'Demo A', unit: 'ICU', age: 64, sex: 'M', heightCm: 172, admitDate: D(9), dialysis: 'None',
+      allergies: 'None recorded', context: 'Demo data: post-operative abdominal surgery, ventilated.', targets: { preset: 'icu_acute' }
+    });
+    icu.weights.push(rec({ date: D(9), weightKg: 78, method: 'Estimated' }), rec({ date: D(5), weightKg: 79.5, method: 'Bed scale' }), rec({ date: D(1), weightKg: 80.2, method: 'Bed scale' }));
+    const pnDays = { 8: [150, 60, 0, 1500], 7: [180, 70, 250, 1800], 6: [200, 80, 250, 2000], 5: [180, 80, 250, 2000], 4: [140, 70, 125, 1700], 3: [100, 60, 0, 1400] };
+    Object.keys(pnDays).forEach(k => {
+      const v = pnDays[k];
+      icu.tpn.push(rec({ date: D(+k), access: 'Central', volumeMl: v[3], dextroseG: v[0], aminoAcidG: v[1], lipidMl: v[2], lipidConc: 20, lipidMode: 'Separate', na: 80, k: 60, ca: 5, mg: 8, phos: 15, additives: 'Trace elements + multivitamin', notes: '' }));
+    });
+    const enK = [0, 0, 400, 700, 900, 1100, 1300, 1400, 1500];
+    for (let i = 8; i >= 0; i--) {
+      const idx = 8 - i, o = icu.tpn.find(t => t.date === D(i)), c = o ? C.pnCalc(o, 78) : null;
+      icu.intake.push(rec({
+        date: D(i), enKcal: enK[idx], enProt: Math.round(enK[idx] * 0.045), pnKcal: c ? Math.round(c.totalKcal) : 0, pnProt: o ? o.aminoAcidG : 0,
+        propofolMl: i >= 5 ? 300 : 0, fluidIn: 2600 - idx * 60, urineOut: 1400 + idx * 40, otherOut: 200, tolerance: idx < 3 ? 'Fair' : 'Good', note: ''
+      }));
+    }
+    const icuLabs = {
+      k: [4.1, 3.9, 3.6, 3.4, 3.7, 4.0, 4.2, 4.1, 4.3], phos: [0.95, 0.8, 0.62, 0.58, 0.7, 0.85, 0.95, 1.0, 1.05],
+      mg: [0.82, 0.75, 0.55, 0.48, 0.6, 0.7, 0.78, 0.8, 0.82], gluc: [7.2, 8.9, 10.4, 11.2, 9.1, 8.2, 7.8, 7.5, 7.1],
+      tg: [1.4, null, 2.2, 4.8, 3.1, 2.4, 1.8, null, 1.5], na: [139, 138, 140, 141, 139, 138, 137, 138, 139],
+      creat: [88, 92, 90, 86, 84, 80, 78, 76, 74], urea: [6.1, 6.8, 7.2, 7.5, 7.1, 6.6, 6.2, 5.9, 5.6], crp: [180, 210, 190, 150, 120, 96, 70, 55, 40]
+    };
+    for (let i = 8; i >= 0; i--) {
+      const idx = 8 - i, row = rec({ date: D(i) });
+      Object.keys(icuLabs).forEach(k => { if (icuLabs[k][idx] != null) row[k] = icuLabs[k][idx]; });
+      icu.labs.push(row);
+    }
+    icu.meds.push(
+      rec({ name: 'Propofol', dose: '300 mL/day', route: 'IV', freq: 'Infusion', category: 'Sedation (propofol)', start: D(8), stop: D(5), note: '' }),
+      rec({ name: 'Insulin infusion', dose: 'Per sliding scale', route: 'IV', freq: 'Infusion', category: 'Insulin / glucose-lowering', start: D(6), stop: '', note: '' }),
+      rec({ name: 'Pantoprazole', dose: '40 mg', route: 'IV', freq: 'Daily', category: 'PPI / H2 blocker', start: D(9), stop: '', note: '' }),
+      rec({ name: 'Metoclopramide', dose: '10 mg', route: 'IV', freq: 'TDS', category: 'Prokinetic / antiemetic', start: D(7), stop: '', note: '' }),
+      rec({ name: 'Thiamine', dose: '100 mg', route: 'IV', freq: 'Daily', category: 'Vitamin / mineral supplement', start: D(8), stop: '', note: '' })
+    );
+    icu.notes.push(
+      rec({ date: D(8), category: 'Plan', text: 'Trophic EN planned; PN bridge via central line until EN reaches >60% of target.' }),
+      rec({ date: D(4), category: 'Dietitian review', text: 'Phosphate/Mg replaced; feed rate advanced as tolerated. Plan to wean PN.' }),
+      rec({ date: D(2), category: 'Tolerance', text: 'PN stopped D-3; EN tolerated well, no vomiting, bowels open.' })
+    );
+
+    // ---- 2. Renal unit: maintenance haemodialysis, poor oral intake ----
+    const hd = shell({
+      mrn: 'DEMO-REN-12', name: 'Demo B', unit: 'Renal unit', age: 58, sex: 'F', heightCm: 160, admitDate: D(6), dialysis: 'Intermittent HD',
+      allergies: 'None recorded', context: 'Demo data: admitted for access-related problem, on thrice-weekly haemodialysis.',
+      targets: { preset: 'hd', fluidLimit: 1000 }
+    });
+    hd.weights.push(
+      rec({ date: D(6), weightKg: 64.2, method: 'Pre-dialysis' }), rec({ date: D(6), weightKg: 62.0, method: 'Post-dialysis (dry weight)' }),
+      rec({ date: D(4), weightKg: 63.9, method: 'Pre-dialysis' }), rec({ date: D(4), weightKg: 62.1, method: 'Post-dialysis (dry weight)' }),
+      rec({ date: D(2), weightKg: 64.5, method: 'Pre-dialysis' }), rec({ date: D(2), weightKg: 62.2, method: 'Post-dialysis (dry weight)' })
+    );
+    const oralK = [1250, 1200, 1150, 1100, 1000, 1050, 1100], oralP = [45, 44, 42, 40, 36, 38, 40];
+    for (let i = 6; i >= 0; i--) {
+      const idx = 6 - i;
+      hd.intake.push(rec({ date: D(i), oralKcal: oralK[idx], oralProt: oralP[idx], fluidIn: 900 + (idx % 3) * 60, urineOut: 350, otherOut: 0, tolerance: 'Fair', note: idx > 3 ? 'Poor appetite, early satiety' : '' }));
+    }
+    const hdLabs = { k: [5.2, 5.4, 5.6, 5.8, 5.5, 5.9, 5.7], phos: [1.9, 2.0, 1.8, 1.9, 2.1, 2.0, 1.9], mg: [0.9, 0.9, 0.88, 0.92, 0.9, 0.9, 0.91], urea: [22, 24, 21, 23, 25, 22, 24], creat: [620, 640, 610, 630, 650, 625, 640], ca: [2.2, 2.2, 2.3, 2.2, 2.2, 2.3, 2.2], alb: [32, 31, 31, 30, 30, 29, 30], gluc: [5.8, 6.1, 5.5, 6.0, 5.7, 5.9, 5.8] };
+    for (let i = 6; i >= 0; i--) {
+      if (i % 2 === 1 && i !== 5 && i !== 1) continue;
+      const idx = 6 - i, row = rec({ date: D(i) });
+      Object.keys(hdLabs).forEach(k => { row[k] = hdLabs[k][idx]; });
+      hd.labs.push(row);
+    }
+    hd.meds.push(
+      rec({ name: 'Sevelamer', dose: '800 mg', route: 'PO', freq: 'TDS with meals', category: 'Phosphate binder', start: D(6), stop: '', note: '' }),
+      rec({ name: 'Epoetin', dose: '4000 units', route: 'SC', freq: '3x/week', category: 'ESA / iron (renal anaemia)', start: D(6), stop: '', note: '' }),
+      rec({ name: 'Alfacalcidol', dose: '0.25 mcg', route: 'PO', freq: 'Daily', category: 'Vitamin D analogue / calcimimetic', start: D(6), stop: '', note: '' }),
+      rec({ name: 'Renal multivitamin', dose: '1 tablet', route: 'PO', freq: 'Daily', category: 'Vitamin / mineral supplement', start: D(6), stop: '', note: '' })
+    );
+    hd.notes.push(rec({ date: D(5), category: 'Dietitian review', text: 'Appetite reduced; discussed small frequent meals, renal oral nutritional supplement. Reinforced potassium and phosphate guidance.' }));
+
+    // ---- 3. ICU patient on CRRT with enteral feeding ----
+    const crrt = shell({
+      mrn: 'DEMO-ICU-09', name: 'Demo C', unit: 'ICU', age: 49, sex: 'M', heightCm: 180, admitDate: D(5), dialysis: 'CRRT',
+      allergies: 'None recorded', context: 'Demo data: septic shock with AKI, on CRRT.', targets: { preset: 'crrt' }
+    });
+    crrt.weights.push(rec({ date: D(5), weightKg: 85, method: 'Estimated' }), rec({ date: D(2), weightKg: 87.1, method: 'Bed scale' }));
+    const cK = [0, 800, 1200, 1500, 1800], cP = [0, 70, 100, 125, 150];
+    for (let i = 4; i >= 0; i--) {
+      const idx = 4 - i;
+      crrt.intake.push(rec({ date: D(i), enKcal: cK[idx], enProt: cP[idx], propofolMl: 200, fluidIn: 3200, urineOut: 150, otherOut: 1800, tolerance: idx === 0 ? 'Held/NPO' : 'Good', note: '' }));
+    }
+    const cl = { k: [4.4, 4.0, 3.8, 3.6, 3.9], phos: [1.1, 0.8, 0.55, 0.6, 0.58], mg: [0.9, 0.8, 0.62, 0.58, 0.66], gluc: [9.5, 9.0, 8.4, 8.1, 7.9], tg: [1.8, null, 2.6, null, 2.9], na: [138, 137, 139, 140, 139], urea: [18, 14, 11, 9, 8], creat: [260, 190, 140, 120, 110] };
+    for (let i = 4; i >= 0; i--) {
+      const idx = 4 - i, row = rec({ date: D(i) });
+      Object.keys(cl).forEach(k => { if (cl[k][idx] != null) row[k] = cl[k][idx]; });
+      crrt.labs.push(row);
+    }
+    crrt.meds.push(
+      rec({ name: 'Noradrenaline', dose: 'Titrated', route: 'IV', freq: 'Infusion', category: 'Vasopressor', start: D(5), stop: '', note: '' }),
+      rec({ name: 'Meropenem', dose: '1 g', route: 'IV', freq: 'TDS', category: 'Antibiotic', start: D(5), stop: '', note: '' }),
+      rec({ name: 'Insulin infusion', dose: 'Per protocol', route: 'IV', freq: 'Infusion', category: 'Insulin / glucose-lowering', start: D(4), stop: '', note: '' }),
+      rec({ name: 'Phosphate replacement', dose: '20 mmol', route: 'IV', freq: 'As needed', category: 'Vitamin / mineral supplement', start: D(3), stop: '', note: 'Losses on CRRT' }),
+      rec({ name: 'Propofol', dose: '200 mL/day', route: 'IV', freq: 'Infusion', category: 'Sedation (propofol)', start: D(5), stop: '', note: '' })
+    );
+    crrt.notes.push(rec({ date: D(3), category: 'Plan', text: 'EN advanced with protein modular. Monitor phosphate/Mg daily while on CRRT; replace per protocol.' }));
+
+    return [icu, hd, crrt];
+  }
+
+  root.Demo = { build };
+})(typeof self !== 'undefined' ? self : this);
+
+</script>
+<script>
+/* CCNM user interface. Vanilla JS, no build step. */
+(function () {
+  'use strict';
+  const C = window.Calc, S = window.Store, Ch = window.Charts;
+
+  const ui = { view: 'patients', pid: null, tab: 'overview', labKey: 'k', search: '', unit: '', pnDraft: null };
+  const TABS = [['overview', 'Overview'], ['intake', 'Intake'], ['labs', 'Labs'], ['meds', 'Medications'], ['pn', 'PN'], ['notes', 'Screening & notes'], ['report', 'Report']];
+  const UNITS = ['ICU', 'HDU', 'Renal unit', 'Dialysis unit', 'Ward', 'Other'];
+  const COLORS = { oral: '#4c9be8', en: '#2fb67c', pn: '#e0a030', other: '#9a8cc9' };
+
+  const MED_CATS = [
+    ['Other', ''],
+    ['Insulin / glucose-lowering', 'Monitor glucose; review dose when feed rate or PN changes.'],
+    ['Sedation (propofol)', 'Lipid source (~1.1 kcal/mL): enter volume in the intake log so energy is counted; monitor triglycerides.'],
+    ['Diuretic', 'Monitor K, Mg, Na and fluid balance.'],
+    ['ACE inhibitor / ARB / K-sparing', 'Monitor potassium, especially with reduced renal function.'],
+    ['Phosphate binder', 'Timing with meals/feeds matters; monitor phosphate and calcium.'],
+    ['Vitamin D analogue / calcimimetic', 'Monitor calcium and phosphate.'],
+    ['ESA / iron (renal anaemia)', 'Record dose and route; iron/Hb results reviewed by the care team.'],
+    ['Vitamin / mineral supplement', 'Record dose; check relevant levels.'],
+    ['Antibiotic', 'Some agents (e.g. quinolones, tetracyclines) bind divalent cations - check timing against feeds/supplements with pharmacy.'],
+    ['Prokinetic / antiemetic', 'Review together with enteral feeding tolerance.'],
+    ['PPI / H2 blocker', 'Prolonged use can be associated with low magnesium.'],
+    ['Steroid', 'Raises glucose; catabolic effect on protein balance.'],
+    ['Vasopressor', 'Follow local protocol for enteral feeding during vasopressor support.'],
+    ['Anticoagulant (warfarin)', 'Vitamin K in feeds/PN can affect INR - keep intake consistent.'],
+    ['Nutrition product (ONS/modular)', 'Count energy/protein in the intake log.']
+  ];
+  const hintFor = cat => (MED_CATS.find(c => c[0] === cat) || ['', ''])[1];
+
+  const $ = s => document.querySelector(s);
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const fmt = (v, d) => (v == null || !Number.isFinite(v)) ? '&ndash;' : Number(v).toFixed(d || 0);
+  const cur = () => S.patient(ui.pid);
+  const today = () => C.todayStr();
+  const cfg = () => S.data.settings;
+
+  function toast(msg) {
+    const t = $('#toast'); t.textContent = msg; t.classList.add('show');
+    clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove('show'), 2200);
+  }
+
+  // ---------- forms ----------
+  const num = (name, label, unit) => ({ name, label, unit, type: 'number' });
+  const FORMS = {
+    patients: {
+      title: 'Patient',
+      fields: [
+        { name: 'mrn', label: 'Patient ID / bed (pseudonymised)', required: true },
+        { name: 'name', label: 'Name or initials' },
+        { name: 'unit', label: 'Unit', type: 'select', options: UNITS },
+        num('age', 'Age', 'years'),
+        { name: 'sex', label: 'Sex', type: 'select', options: ['M', 'F'] },
+        num('heightCm', 'Height', 'cm'),
+        { name: 'admitDate', label: 'Admission date', type: 'date', required: true },
+        { name: 'dialysis', label: 'Renal replacement', type: 'select', options: ['None', 'Intermittent HD', 'PD', 'CRRT', 'SLED'] },
+        Object.assign(num('weightKg', 'Current weight', 'kg'), { newOnly: true }),
+        { name: 'allergies', label: 'Allergies / intolerances', full: true },
+        { name: 'context', label: 'Clinical context (as documented by the care team; not a diagnosis tool)', type: 'textarea', full: true }
+      ]
+    },
+    weights: {
+      title: 'Weight',
+      fields: [
+        { name: 'date', label: 'Date', type: 'date', required: true },
+        Object.assign(num('weightKg', 'Weight', 'kg'), { required: true }),
+        { name: 'method', label: 'Method', type: 'select', options: ['Bed scale', 'Chair scale', 'Pre-dialysis', 'Post-dialysis (dry weight)', 'Estimated', 'Stated'] },
+        { name: 'note', label: 'Note', full: true }
+      ]
+    },
+    intake: {
+      title: 'Daily intake',
+      fields: [
+        { name: 'date', label: 'Date', type: 'date', required: true, full: true },
+        num('oralKcal', 'Oral energy', 'kcal'), num('enKcal', 'Enteral energy', 'kcal'), num('pnKcal', 'Parenteral energy', 'kcal'),
+        num('propofolMl', 'Propofol volume', 'mL'), num('otherKcal', 'Other non-nutritional kcal (e.g. IV dextrose)', 'kcal'),
+        num('oralProt', 'Oral protein', 'g'), num('enProt', 'Enteral protein', 'g'), num('pnProt', 'Parenteral protein (amino acids)', 'g'),
+        num('fluidIn', 'Total fluid in', 'mL'), num('urineOut', 'Urine output', 'mL'), num('otherOut', 'Other losses (drains, UF, stool...)', 'mL'),
+        { name: 'tolerance', label: 'Feed tolerance', type: 'select', options: ['', 'Good', 'Fair', 'Poor', 'Held/NPO'] },
+        { name: 'note', label: 'Note', full: true }
+      ]
+    },
+    labs: {
+      title: 'Lab results',
+      fields: [{ name: 'date', label: 'Date', type: 'date', required: true, full: true }]
+        .concat(C.LAB_DEFS.map(l => num(l.key, l.label, l.unit)))
+    },
+    meds: {
+      title: 'Medication',
+      fields: [
+        { name: 'name', label: 'Medication', required: true },
+        { name: 'dose', label: 'Dose' },
+        { name: 'route', label: 'Route', type: 'select', options: ['PO', 'IV', 'SC', 'IM', 'NG/PEG', 'Inhaled', 'Topical', 'Other'] },
+        { name: 'freq', label: 'Frequency' },
+        { name: 'category', label: 'Category (for nutrition-related prompts)', type: 'select', options: MED_CATS.map(c => c[0]), full: true },
+        { name: 'start', label: 'Start date', type: 'date' },
+        { name: 'stop', label: 'Stop date', type: 'date' },
+        { name: 'note', label: 'Note', full: true }
+      ]
+    },
+    notes: {
+      title: 'Note',
+      fields: [
+        { name: 'date', label: 'Date', type: 'date', required: true },
+        { name: 'category', label: 'Category', type: 'select', options: ['Dietitian review', 'Plan', 'Goal', 'Tolerance', 'Screening', 'Other'] },
+        { name: 'text', label: 'Note', type: 'textarea', full: true, required: true }
+      ]
+    }
+  };
+
+  function fieldHtml(f, val) {
+    const v = val == null ? '' : val, id = 'f_' + f.name;
+    let input;
+    if (f.type === 'select') {
+      input = `<select name="${f.name}" id="${id}">${f.options.map(o => { const ov = typeof o === 'object' ? o.v : o, ol = typeof o === 'object' ? o.l : o; return `<option value="${esc(ov)}" ${String(ov) === String(v) ? 'selected' : ''}>${esc(ol)}</option>`; }).join('')}</select>`;
+    } else if (f.type === 'textarea') {
+      input = `<textarea name="${f.name}" id="${id}" rows="3" ${f.required ? 'required' : ''}>${esc(v)}</textarea>`;
+    } else {
+      input = `<input name="${f.name}" id="${id}" type="${f.type || 'text'}" ${f.type === 'number' ? 'step="any" inputmode="decimal"' : ''} value="${esc(v)}" ${f.required ? 'required' : ''}>`;
+    }
+    return `<label class="field ${f.full ? 'full' : ''}"><span>${esc(f.label)}${f.unit ? ` <em>(${esc(f.unit)})</em>` : ''}</span>${input}</label>`;
+  }
+
+  function openForm(o) {
+    const dlg = $('#dlg'), fields = o.fields;
+    dlg.innerHTML = `<form id="dlgForm" autocomplete="off"><h3>${esc(o.title)}</h3><div class="fgrid">${fields.map(f => fieldHtml(f, (o.values || {})[f.name])).join('')}</div>` +
+      `<div class="actions"><button type="button" class="btn" data-close>Cancel</button><button type="submit" class="btn primary">${esc(o.submit || 'Save')}</button></div></form>`;
+    const form = $('#dlgForm');
+    form.onsubmit = e => {
+      e.preventDefault();
+      const out = {};
+      fields.forEach(f => {
+        const el = form.elements[f.name]; let v = el.value;
+        if (f.type === 'number') v = v === '' ? null : Number(v);
+        out[f.name] = v;
+      });
+      o.onSave(out); dlg.close(); render();
+    };
+    dlg.querySelector('[data-close]').onclick = () => dlg.close();
+    dlg.showModal();
+  }
+
+  // ---------- small view helpers ----------
+  function barClass(p) { return p < 60 ? 'low' : p < 90 ? 'mid' : p <= 110 ? '' : 'over'; }
+  function bar(label, pct, detail) {
+    return `<div class="small"><div style="display:flex;justify-content:space-between"><span>${label}</span><span>${pct == null ? '&ndash;' : Math.round(pct) + '%'} <span class="muted">${detail || ''}</span></span></div>` +
+      `<div class="bar ${pct == null ? '' : barClass(pct)}"><i style="width:${Math.max(0, Math.min(100, pct || 0))}%"></i></div></div>`;
+  }
+  function alertsHtml(list) {
+    if (!list.length) return '<div class="empty">No flags. Nothing outside the configured thresholds.</div>';
+    return '<ul class="alerts">' + list.map(a => `<li class="${a.level}">${esc(a.text)}</li>`).join('') + '</ul>';
+  }
+  const rowBtns = (coll, id, extra) => `<button class="btn sm" data-action="edit" data-coll="${coll}" data-id="${id}">Edit</button> ${extra || ''}<button class="btn sm danger" data-action="del" data-coll="${coll}" data-id="${id}">Delete</button>`;
+  const emptyRow = (cols, msg) => `<tr><td colspan="${cols}" class="empty">${msg}</td></tr>`;
+  const isActive = m => !m.stop || m.stop >= today();
+
+  // ---------- views ----------
+  function render() {
+    document.querySelectorAll('.topbar nav button').forEach(b => b.classList.toggle('on', b.dataset.view === ui.view || (ui.view === 'patient' && b.dataset.view === 'patients')));
+    const views = { patients: renderPatients, patient: renderPatient, settings: renderSettings, about: renderAbout };
+    $('#app').innerHTML = (views[ui.view] || renderPatients)();
+    if (ui.view === 'patients') renderList();
+    if (ui.view === 'patient' && ui.tab === 'pn') updatePn();
+    if (ui.view === 'patient' && ui.tab === 'notes') updateMust();
+  }
+
+  function renderPatients() {
+    const n = S.data.patients.length;
+    return `<div class="toolbar"><h2>Patients <small>${n}</small></h2><div class="tools">` +
+      `<input type="search" id="search" placeholder="Search ID or name" value="${esc(ui.search)}">` +
+      `<select id="unitFilter"><option value="">All units</option>${UNITS.map(u => `<option ${u === ui.unit ? 'selected' : ''}>${u}</option>`).join('')}</select>` +
+      `<button class="btn primary" data-action="new-patient">+ New patient</button></div></div>` +
+      `<div id="plist" class="cards"></div>` +
+      (n ? '' : `<div class="card empty">No patients yet. Add one, or <button class="btn sm" data-action="demo">load synthetic demo patients</button> to explore.</div>`);
+  }
+
+  function renderList() {
+    const q = ui.search.trim().toLowerCase();
+    const list = S.data.patients.filter(p => (!ui.unit || p.unit === ui.unit) && (!q || (p.mrn + ' ' + p.name).toLowerCase().includes(q)));
+    $('#plist').innerHTML = list.map(patientCard).join('') || (S.data.patients.length ? '<div class="empty">No matches.</div>' : '');
+  }
+
+  function patientCard(p) {
+    const al = C.evaluateAlerts(p, cfg(), today());
+    const hi = al.filter(a => a.level === 'high').length, wa = al.filter(a => a.level === 'warn').length;
+    const last = C.sortAsc(p.intake).pop(), ad = last ? C.adequacy(p, last) : null, w = C.latestWeight(p);
+    const day = C.dayDiff(p.admitDate, today()) + 1;
+    return `<article class="card pcard" role="button" tabindex="0" data-action="open" data-id="${p.id}">
+      <div class="row"><h3>${esc(p.mrn)}${p.name ? ' <span class="muted">' + esc(p.name) + '</span>' : ''}</h3><span class="chip">${esc(p.unit)}</span></div>
+      <div class="small muted">${p.age ? esc(p.age) + 'y ' : ''}${esc(p.sex)} &middot; day ${day} &middot; ${w ? fmt(w.weightKg, 1) + ' kg' : 'no weight'}${p.dialysis && p.dialysis !== 'None' ? ' &middot; ' + esc(p.dialysis) : ''}</div>
+      <div class="small" style="margin:.5rem 0">${hi ? `<span class="chip high">${hi} high</span>` : ''}${wa ? `<span class="chip warn">${wa} warning${wa > 1 ? 's' : ''}</span>` : ''}${!hi && !wa ? '<span class="chip ok">no flags</span>' : ''}</div>
+      <div class="small muted">${ad ? `Last intake ${esc(last.date)}: energy ${Math.round(ad.kcalPct)}%, protein ${Math.round(ad.protPct)}% of target` : 'No intake logged'}</div>
+    </article>`;
+  }
+
+  function renderPatient() {
+    const p = cur();
+    if (!p) { ui.view = 'patients'; return renderPatients(); }
+    const body = { overview: tabOverview, intake: tabIntake, labs: tabLabs, meds: tabMeds, pn: tabPn, notes: tabNotes, report: tabReport }[ui.tab] || tabOverview;
+    const day = C.dayDiff(p.admitDate, today()) + 1;
+    return `<div class="phead"><div><h2>${esc(p.mrn)}${p.name ? ' <small>' + esc(p.name) + '</small>' : ''}</h2>
+      <div class="muted small"><span class="chip">${esc(p.unit)}</span>${p.age ? esc(p.age) + ' y, ' : ''}${esc(p.sex)} &middot; admitted ${esc(p.admitDate)} (day ${day})${p.heightCm ? ' &middot; ' + esc(p.heightCm) + ' cm' : ''}${p.dialysis && p.dialysis !== 'None' ? ' &middot; ' + esc(p.dialysis) : ''}${p.allergies ? ' &middot; Allergies/intolerances: ' + esc(p.allergies) : ''}</div>
+      ${p.context ? `<div class="small muted" style="margin-top:.25rem">${esc(p.context)}</div>` : ''}</div>
+      <div class="noprint"><button class="btn sm" data-action="edit-patient">Edit patient</button> <button class="btn sm danger" data-action="del-patient">Delete</button></div></div>
+      <div class="tabs noprint">${TABS.map(t => `<button data-action="tab" data-tab="${t[0]}" class="${ui.tab === t[0] ? 'on' : ''}">${t[1]}</button>`).join('')}</div>${body(p)}`;
+  }
+
+  // ----- overview -----
+  function tabOverview(p) {
+    const T = C.targetsFor(p), dw = C.dosingWeight(p), al = C.evaluateAlerts(p, cfg(), today());
+    const intake = C.sortAsc(p.intake), last = intake[intake.length - 1];
+    const ad = last ? C.adequacy(p, last) : null, lt = last ? C.intakeTotals(last) : null;
+    const weights = C.sortAsc(p.weights);
+
+    const anthro = `<div class="card"><div class="sectionhead"><h4>Anthropometry</h4><button class="btn sm" data-action="add" data-coll="weights">+ Weight</button></div>` +
+      (dw ? `<dl class="kv"><dt>Latest weight</dt><dd>${fmt(dw.actual, 1)} kg <span class="muted small">(${esc(dw.date)})</span></dd><dt>BMI</dt><dd>${fmt(dw.bmi, 1)}</dd><dt>Ideal weight (Devine)</dt><dd>${fmt(dw.ibw, 1)} kg</dd><dt>Adjusted weight</dt><dd>${fmt(dw.adj, 1)} kg</dd><dt>Dosing weight used</dt><dd>${fmt(dw.kg, 1)} kg <span class="muted small">(${esc(dw.basis)})</span></dd></dl>` : '<div class="empty">Add a weight to calculate targets.</div>') + '</div>';
+
+    const targets = `<div class="card"><div class="sectionhead"><h4>Targets</h4><button class="btn sm" data-action="edit-targets">Edit</button></div>` +
+      `<div class="small muted" style="margin-bottom:.4rem">${esc(T.presetLabel)}</div>` +
+      (T.kcalTarget ? `<dl class="kv"><dt>Energy</dt><dd>${fmt(T.kcalMin)}&ndash;${fmt(T.kcalMax)} kcal <span class="muted small">(${T.kcalPerKgMin}&ndash;${T.kcalPerKgMax}/kg)</span></dd><dt>Protein</dt><dd>${fmt(T.protMin)}&ndash;${fmt(T.protMax)} g <span class="muted small">(${T.protPerKgMin}&ndash;${T.protPerKgMax}/kg)</span></dd><dt>Fluid limit</dt><dd>${T.fluidLimit ? fmt(T.fluidLimit) + ' mL/day' : 'not set'}</dd></dl><div class="small muted" style="margin-top:.4rem">Adequacy uses the midpoint of each range.</div>` : '<div class="empty">Needs a weight.</div>') + '</div>';
+
+    const latest = `<div class="card"><div class="sectionhead"><h4>Latest intake ${last ? '&middot; ' + esc(last.date) : ''}</h4><button class="btn sm" data-action="add" data-coll="intake">+ Intake</button></div>` +
+      (last ? bar('Energy', ad ? ad.kcalPct : null, `${fmt(lt.total)} kcal`) + bar('Protein', ad ? ad.protPct : null, `${fmt(lt.protein)} g`) +
+        `<div class="small muted">Fluid in ${fmt(lt.fluidIn)} / out ${fmt(lt.fluidOut)} mL (balance ${lt.balance > 0 ? '+' : ''}${fmt(lt.balance)})</div>` : '<div class="empty">No intake logged.</div>') + '</div>';
+
+    const days = intake.slice(-14);
+    const eDays = days.map(e => { const t = C.intakeTotals(e); return { label: e.date, parts: [{ name: 'Oral', color: COLORS.oral, value: t.oral }, { name: 'Enteral', color: COLORS.en, value: t.en }, { name: 'Parenteral', color: COLORS.pn, value: t.pn }, { name: 'Non-nutritional', color: COLORS.other, value: t.propofol + t.other }] }; });
+    const pDays = days.map(e => { const t = C.intakeTotals(e); return { label: e.date, parts: [{ name: 'Oral', color: COLORS.oral, value: t.protOral }, { name: 'Enteral', color: COLORS.en, value: t.protEn }, { name: 'Parenteral', color: COLORS.pn, value: t.protPn }] }; });
+    const leg = [{ name: 'Oral', color: COLORS.oral }, { name: 'Enteral', color: COLORS.en }, { name: 'Parenteral', color: COLORS.pn }];
+    const eChart = Ch.stackedBars(eDays, { target: { min: T.kcalMin, max: T.kcalMax, mid: T.kcalTarget }, label: 'Energy delivered by source' }) + Ch.legend(leg.concat([{ name: 'Propofol / other', color: COLORS.other }]));
+    const pChart = Ch.stackedBars(pDays, { target: { min: T.protMin, max: T.protMax, mid: T.protTarget }, label: 'Protein delivered by source' }) + Ch.legend(leg);
+    const wChart = Ch.lineChart([{ name: 'Weight', color: '#0f766e', points: weights.map(w => ({ x: w.date, y: C.n(w.weightKg) })) }], { label: 'Weight trend' });
+
+    const def = C.LAB_DEFS.find(l => l.key === ui.labKey) || C.LAB_DEFS[1];
+    const lChart = Ch.lineChart([{ name: def.label, color: '#c2410c', points: C.sortAsc(p.labs).map(l => ({ x: l.date, y: C.n(l[def.key]) })) }], { refs: labRefs(def.key), label: def.label + ' trend' });
+
+    return `<div class="grid3">${anthro}${targets}${latest}</div>
+      <div class="card" style="margin-bottom:.75rem"><h4>Monitoring flags</h4>${alertsHtml(al)}<div class="small muted" style="margin-top:.4rem">Prompts to review against configured thresholds &mdash; they are not diagnoses.</div></div>
+      <div class="grid2"><div class="card"><h4>Energy (kcal/day) &middot; shaded = target range</h4>${eChart}</div><div class="card"><h4>Protein (g/day) &middot; shaded = target range</h4>${pChart}</div></div>
+      <div class="grid2"><div class="card"><h4>Weight (kg)</h4>${wChart}</div>
+      <div class="card"><div class="sectionhead"><h4>Lab trend</h4><select data-input="labKey" style="width:auto">${C.LAB_DEFS.map(l => `<option value="${l.key}" ${l.key === def.key ? 'selected' : ''}>${l.label} (${l.unit})</option>`).join('')}</select></div>${lChart}</div></div>
+      <div class="sectionhead"><h3>Weight log</h3></div>
+      <div class="tablewrap"><table><thead><tr><th>Date</th><th class="num">kg</th><th>Method</th><th>Note</th><th></th></tr></thead><tbody>${weights.slice().reverse().slice(0, 12).map(w => `<tr><td>${esc(w.date)}</td><td class="num">${fmt(w.weightKg, 1)}</td><td>${esc(w.method)}</td><td class="wrap">${esc(w.note)}</td><td>${rowBtns('weights', w.id)}</td></tr>`).join('') || emptyRow(5, 'No weights yet.')}</tbody></table></div>`;
+  }
+
+  function labRefs(key) {
+    const s = cfg();
+    return ({
+      k: [{ y: s.kLow, label: 'low ' + s.kLow }, { y: s.kHigh, label: 'high ' + s.kHigh }], na: [{ y: s.naLow, label: 'low ' + s.naLow }, { y: s.naHigh, label: 'high ' + s.naHigh }],
+      phos: [{ y: s.phosLow, label: 'low ' + s.phosLow }], mg: [{ y: s.mgLow, label: 'low ' + s.mgLow }], gluc: [{ y: s.glucHigh, label: 'high ' + s.glucHigh }], tg: [{ y: s.tgHigh, label: 'high ' + s.tgHigh }]
+    })[key] || [];
+  }
+
+  // ----- intake -----
+  function tabIntake(p) {
+    const rows = C.sortAsc(p.intake).reverse().slice(0, 60);
+    const hasT = !!C.targetsFor(p).kcalTarget;
+    return `<div class="sectionhead"><h3>Daily intake log</h3><button class="btn primary" data-action="add" data-coll="intake">+ Add day</button></div>
+      <div class="small muted" style="margin-bottom:.4rem">Total energy = oral + enteral + parenteral + propofol (1.1 kcal/mL) + other non-nutritional. Percentages use the midpoint of the target range${hasT ? '' : ' (add a weight first)'}.</div>
+      <div class="tablewrap"><table><thead><tr><th>Date</th><th class="num">Oral</th><th class="num">EN</th><th class="num">PN</th><th class="num">Other</th><th class="num">Total kcal</th><th class="num">% E</th><th class="num">Protein g</th><th class="num">% P</th><th class="num">Fluid in</th><th class="num">Out</th><th class="num">Balance</th><th>Tol.</th><th></th></tr></thead><tbody>` +
+      (rows.map(e => { const t = C.intakeTotals(e), a = C.adequacy(p, e); return `<tr><td>${esc(e.date)}</td><td class="num">${fmt(t.oral)}</td><td class="num">${fmt(t.en)}</td><td class="num">${fmt(t.pn)}</td><td class="num">${fmt(t.propofol + t.other)}</td><td class="num"><b>${fmt(t.total)}</b></td><td class="num">${a ? Math.round(a.kcalPct) : '&ndash;'}</td><td class="num"><b>${fmt(t.protein)}</b></td><td class="num">${a ? Math.round(a.protPct) : '&ndash;'}</td><td class="num">${fmt(t.fluidIn)}</td><td class="num">${fmt(t.fluidOut)}</td><td class="num">${t.balance > 0 ? '+' : ''}${fmt(t.balance)}</td><td>${esc(e.tolerance)}</td><td>${rowBtns('intake', e.id)}</td></tr>`; }).join('') || emptyRow(14, 'No intake logged yet.')) +
+      '</tbody></table></div>';
+  }
+
+  // ----- labs -----
+  function tabLabs(p) {
+    const rows = C.sortAsc(p.labs).reverse();
+    return `<div class="sectionhead"><h3>Laboratory results</h3><button class="btn primary" data-action="add" data-coll="labs">+ Add results</button></div>
+      <div class="small muted" style="margin-bottom:.4rem">SI units. Red = outside thresholds set in Settings. Albumin and CRP reflect inflammation as well as nutrition &mdash; interpret with the clinical picture.</div>
+      <div class="tablewrap"><table><thead><tr><th>Date</th>${C.LAB_DEFS.map(l => `<th class="num" title="${l.unit}">${l.label}<br><span style="font-weight:400;text-transform:none">${l.unit}</span></th>`).join('')}<th></th></tr></thead><tbody>` +
+      (rows.map(r => `<tr><td>${esc(r.date)}</td>${C.LAB_DEFS.map(l => `<td class="num ${C.flagFor(l.key, r[l.key], cfg())}">${r[l.key] == null || r[l.key] === '' ? '&ndash;' : esc(r[l.key])}</td>`).join('')}<td>${rowBtns('labs', r.id)}</td></tr>`).join('') || emptyRow(C.LAB_DEFS.length + 2, 'No results yet.')) + '</tbody></table></div>';
+  }
+
+  // ----- medications -----
+  function tabMeds(p) {
+    const meds = p.meds.slice().sort((a, b) => String(b.start || '').localeCompare(String(a.start || '')));
+    const row = (m, act) => `<tr><td><b>${esc(m.name)}</b></td><td>${esc(m.dose)}</td><td>${esc(m.route)}</td><td>${esc(m.freq)}</td><td>${esc(m.category === 'Other' ? '' : m.category)}</td><td>${esc(m.start)}</td><td>${esc(m.stop)}</td><td class="wrap small muted">${esc(m.note)}${act && hintFor(m.category) ? (m.note ? '<br>' : '') + esc(hintFor(m.category)) : ''}</td><td>${rowBtns('meds', m.id, act ? `<button class="btn sm" data-action="stop-med" data-id="${m.id}">Stop today</button> ` : '')}</td></tr>`;
+    const head = '<thead><tr><th>Medication</th><th>Dose</th><th>Route</th><th>Frequency</th><th>Category</th><th>Start</th><th>Stop</th><th>Nutrition-related prompt / note</th><th></th></tr></thead>';
+    const act = meds.filter(isActive), old = meds.filter(m => !isActive(m));
+    return `<div class="sectionhead"><h3>Active medications <span class="muted small">${act.length}</span></h3><button class="btn primary" data-action="add" data-coll="meds">+ Add medication</button></div>
+      <div class="tablewrap"><table>${head}<tbody>${act.map(m => row(m, true)).join('') || emptyRow(9, 'No active medications recorded.')}</tbody></table></div>
+      <div class="small muted" style="margin:.4rem 0">Prompts are general reminders of nutrition-related monitoring, not prescribing or interaction advice &mdash; check with pharmacy.</div>
+      ${old.length ? `<div class="sectionhead"><h3>Stopped</h3></div><div class="tablewrap"><table>${head}<tbody>${old.map(m => row(m, false)).join('')}</tbody></table></div>` : ''}`;
+  }
+
+  // ----- parenteral nutrition -----
+  function tabPn(p) {
+    const hist = C.sortAsc(p.tpn), last = hist[hist.length - 1];
+    const base = { date: today(), access: 'Central', volumeMl: '', dextroseG: '', aminoAcidG: '', lipidMl: '', lipidConc: 20, lipidMode: 'Separate', na: '', k: '', ca: '', mg: '', phos: '', additives: '', notes: '' };
+    const d = Object.assign(base, last ? Object.assign({}, last, { date: today() }) : {}, ui.pnDraft || {});
+    ui.pnDraft = null;
+    const inp = (k, label, unit, type) => `<label class="field"><span>${label}${unit ? ` <em>(${unit})</em>` : ''}</span><input data-pn="${k}" type="${type || 'number'}" ${(type || 'number') === 'number' ? 'step="any" inputmode="decimal"' : ''} value="${esc(d[k])}"></label>`;
+    const sel = (k, label, opts) => `<label class="field"><span>${label}</span><select data-pn="${k}">${opts.map(o => `<option ${String(o) === String(d[k]) ? 'selected' : ''}>${o}</option>`).join('')}</select></label>`;
+    const dw = C.dosingWeight(p), wt = dw ? dw.kg : null;
+    return `<div class="grid2"><div class="card"><h3>Parenteral nutrition calculator</h3>
+      <div class="small muted" style="margin-bottom:.5rem">Dosing weight: ${wt ? fmt(wt, 1) + ' kg (' + esc(dw.basis) + ')' : 'none &mdash; add a weight'}. Enter the prescribed 24-hour regimen.</div>
+      <div class="fgrid">${inp('date', 'Date', '', 'date')}${sel('access', 'Access', ['Central', 'Peripheral'])}${inp('volumeMl', 'Total volume', 'mL/24 h')}
+      ${inp('dextroseG', 'Dextrose', 'g/day')}${inp('aminoAcidG', 'Amino acids', 'g/day')}${inp('lipidMl', 'Lipid emulsion', 'mL/day')}
+      ${sel('lipidConc', 'Lipid concentration (%)', [10, 20, 30])}${sel('lipidMode', 'Lipid given as', ['Separate', 'All-in-one'])}<span></span>
+      ${inp('na', 'Sodium', 'mmol')}${inp('k', 'Potassium', 'mmol')}${inp('ca', 'Calcium', 'mmol')}${inp('mg', 'Magnesium', 'mmol')}${inp('phos', 'Phosphate', 'mmol')}
+      ${inp('additives', 'Trace elements / vitamins / other', '', 'text')}</div>
+      <div class="actions noprint"><button class="btn" data-action="pn-intake">Copy to intake log</button><button class="btn primary" data-action="pn-save">Save order</button></div></div>
+      <div class="card"><h3>Calculated</h3><div id="pnOut"></div></div></div>
+      <div class="sectionhead"><h3>Order history</h3></div>
+      <div class="tablewrap"><table><thead><tr><th>Date</th><th>Access</th><th class="num">Vol mL</th><th class="num">kcal</th><th class="num">kcal/kg</th><th class="num">Prot g/kg</th><th class="num">GIR</th><th class="num">Lipid g/kg</th><th class="num">mOsm/L</th><th></th></tr></thead><tbody>` +
+      (hist.slice().reverse().map(o => { const c = C.pnCalc(o, wt), s = cfg(); return `<tr><td>${esc(o.date)}</td><td>${esc(o.access)}</td><td class="num">${fmt(o.volumeMl)}</td><td class="num">${fmt(c.totalKcal)}</td><td class="num">${fmt(c.kcalPerKg, 1)}</td><td class="num">${fmt(c.protPerKg, 2)}</td><td class="num ${c.girMgKgMin > s.girMax ? 'high' : ''}">${fmt(c.girMgKgMin, 1)}</td><td class="num ${c.lipidGperKg > s.lipidMax ? 'high' : ''}">${fmt(c.lipidGperKg, 2)}</td><td class="num ${o.access === 'Peripheral' && c.osm > s.periphOsmMax ? 'high' : ''}">${fmt(c.osm)}</td><td><button class="btn sm" data-action="pn-load" data-id="${o.id}">Load</button> <button class="btn sm danger" data-action="del" data-coll="tpn" data-id="${o.id}">Delete</button></td></tr>`; }).join('') || emptyRow(10, 'No PN orders saved.')) +
+      `</tbody></table></div>
+      <div class="card" style="margin-top:.75rem"><h4>General monitoring reminders (follow local PN policy)</h4>
+      <ul class="small" style="margin:.3rem 0 0 1.1rem;padding:0"><li>Electrolytes (Na, K, Mg, phosphate), glucose and fluid balance: frequently at initiation and after each change, then as stable.</li><li>Triglycerides: baseline and after lipid changes; review lipid dose with propofol.</li><li>Liver function tests, renal function, and weight trend at routine intervals.</li><li>Check access site, line care and ongoing need; review transition to enteral/oral feeding.</li><li>In renal patients/CRRT, review K, phosphate, Mg and fluid volume against the dialysis prescription.</li></ul></div>`;
+  }
+
+  function pnRead() { const o = {}; document.querySelectorAll('[data-pn]').forEach(el => { o[el.dataset.pn] = el.value; }); return o; }
+
+  function updatePn() {
+    const p = cur(), out = $('#pnOut'); if (!p || !out) return;
+    const o = pnRead(), dw = C.dosingWeight(p), c = C.pnCalc(o, dw ? dw.kg : null), s = cfg();
+    const flag = (cond, msg) => cond ? ` <span class="chip warn">${msg}</span>` : '';
+    out.innerHTML = `<dl class="kv">
+      <dt>Total energy</dt><dd><b>${fmt(c.totalKcal)} kcal</b>${c.kcalPerKg != null ? ` (${fmt(c.kcalPerKg, 1)} kcal/kg)` : ''}</dd>
+      <dt>Dextrose</dt><dd>${fmt(c.dexKcal)} kcal &middot; GIR ${fmt(c.girMgKgMin, 1)} mg/kg/min${flag(c.girMgKgMin > s.girMax, '&gt; ' + s.girMax)}</dd>
+      <dt>Amino acids</dt><dd>${fmt(c.aaKcal)} kcal &middot; ${fmt(c.protPerKg, 2)} g/kg</dd>
+      <dt>Lipid</dt><dd>${fmt(c.lipidG, 1)} g &middot; ${fmt(c.lipKcal)} kcal &middot; ${fmt(c.lipidGperKg, 2)} g/kg${flag(c.lipidGperKg > s.lipidMax, '&gt; ' + s.lipidMax)}</dd>
+      <dt>Non-protein kcal : N</dt><dd>${c.npcN ? fmt(c.npcN) + ' : 1' : '&ndash;'}</dd>
+      <dt>Volume</dt><dd>${fmt(c.volPerKg, 1)} mL/kg &middot; ${fmt(c.kcalPerMl, 2)} kcal/mL</dd>
+      <dt>Est. osmolarity</dt><dd>${c.osm ? fmt(c.osm) + ' mOsm/L' : '&ndash;'}${flag(o.access === 'Peripheral' && c.osm > s.periphOsmMax, 'peripheral limit ' + s.periphOsmMax)}</dd></dl>
+      <div class="small muted" style="margin-top:.5rem">Osmolarity is a rough estimate (dextrose 5, amino acids 10 mOsm/g; electrolytes as mEq &times; 2). Verify with the pharmacy compounding record. Phospholipid phosphate from lipid emulsion is not counted.</div>`;
+  }
+
+  // ----- screening & notes -----
+  function tabNotes(p) {
+    const dw = C.dosingWeight(p), notes = C.sortAsc(p.notes).reverse();
+    return `<div class="grid2"><div class="card"><h3>MUST screening</h3>
+      <div class="small muted" style="margin-bottom:.5rem">Malnutrition Universal Screening Tool. BMI from latest weight and height: <b>${dw && dw.bmi ? fmt(dw.bmi, 1) : 'unavailable &mdash; add height and weight'}</b>.</div>
+      <div class="fgrid"><label class="field"><span>Unplanned weight loss in 3&ndash;6 months <em>(%)</em></span><input data-must="wl" type="number" step="any" inputmode="decimal"></label>
+      <label class="field"><span>Acutely ill and no/likely no intake for &gt;5 days</span><select data-must="acute"><option value="0">No</option><option value="1">Yes</option></select></label></div>
+      <div id="mustOut" style="margin-top:.6rem"></div><div class="actions noprint"><button class="btn" data-action="must-save">Save result to notes</button></div></div>
+      <div class="card"><div class="sectionhead"><h3>Notes &amp; goals</h3><button class="btn primary noprint" data-action="add" data-coll="notes">+ Note</button></div>
+      ${notes.map(n => `<div class="note"><div class="small muted"><span class="chip">${esc(n.category)}</span>${esc(n.date)} <span class="noprint">${rowBtns('notes', n.id)}</span></div>${esc(n.text)}</div>`).join('') || '<div class="empty">No notes yet.</div>'}</div></div>`;
+  }
+
+  function mustRead() {
+    const p = cur(), dw = C.dosingWeight(p);
+    const wl = document.querySelector('[data-must="wl"]'), ac = document.querySelector('[data-must="acute"]');
+    return C.must({ bmi: dw ? dw.bmi : null, weightLossPct: wl ? wl.value : null, acuteNoIntake: ac && ac.value === '1' });
+  }
+  function updateMust() {
+    const out = $('#mustOut'); if (!out) return;
+    const r = mustRead();
+    out.innerHTML = r.complete ? `<span class="chip ${r.risk === 'High' ? 'high' : r.risk === 'Medium' ? 'warn' : 'ok'}">${r.risk} risk</span> score ${r.total} <span class="muted small">(BMI ${r.bmiScore} + weight loss ${r.wlScore} + acute ${r.acuteScore})</span>` : '<span class="muted small">Enter weight loss % (and ensure height/weight are recorded).</span>';
+  }
+
+  // ----- report -----
+  function tabReport(p) {
+    const T = C.targetsFor(p), al = C.evaluateAlerts(p, cfg(), today()), dw = C.dosingWeight(p);
+    const last7 = C.sortAsc(p.intake).slice(-7), ads = last7.map(e => C.adequacy(p, e)).filter(Boolean);
+    const avg = k => ads.length ? ads.reduce((a, x) => a + x[k], 0) / ads.length : null;
+    const labRows = C.LAB_DEFS.map(l => { const v = C.latestLab(p.labs, l.key); return v ? `<tr><td>${l.label}</td><td class="num ${C.flagFor(l.key, v.value, cfg())}">${v.value} ${l.unit}</td><td>${esc(v.date)}</td></tr>` : ''; }).join('');
+    const hist = C.sortAsc(p.tpn), lastPn = hist[hist.length - 1], pc = lastPn ? C.pnCalc(lastPn, dw ? dw.kg : null) : null;
+    const actMeds = p.meds.filter(isActive);
+    return `<div class="sectionhead noprint"><h3>Progress summary</h3><button class="btn primary" data-action="print">Print / save PDF</button></div>
+      <div class="printonly"><h2>Nutrition progress summary &mdash; ${esc(p.mrn)}</h2><div class="small">Printed ${today()}</div></div>
+      <div class="grid2"><div class="card"><h4>Targets &amp; delivery</h4><dl class="kv"><dt>Preset</dt><dd>${esc(T.presetLabel)}</dd><dt>Dosing weight</dt><dd>${dw ? fmt(dw.kg, 1) + ' kg (' + esc(dw.basis) + ')' : '&ndash;'}</dd><dt>Energy target</dt><dd>${T.kcalTarget ? fmt(T.kcalMin) + '&ndash;' + fmt(T.kcalMax) + ' kcal' : '&ndash;'}</dd><dt>Protein target</dt><dd>${T.protTarget ? fmt(T.protMin) + '&ndash;' + fmt(T.protMax) + ' g' : '&ndash;'}</dd><dt>Avg energy adequacy (last ${ads.length} days)</dt><dd>${avg('kcalPct') == null ? '&ndash;' : Math.round(avg('kcalPct')) + '%'}</dd><dt>Avg protein adequacy</dt><dd>${avg('protPct') == null ? '&ndash;' : Math.round(avg('protPct')) + '%'}</dd></dl></div>
+      <div class="card"><h4>Monitoring flags</h4>${alertsHtml(al)}</div></div>
+      <div class="grid2"><div class="card"><h4>Latest labs</h4><div class="tablewrap"><table><tbody>${labRows || emptyRow(3, 'None')}</tbody></table></div></div>
+      <div class="card"><h4>Active medications</h4>${actMeds.length ? '<ul style="margin:.2rem 0 0 1.1rem;padding:0">' + actMeds.map(m => `<li>${esc(m.name)} ${esc(m.dose)} ${esc(m.route)} ${esc(m.freq)}</li>`).join('') + '</ul>' : '<div class="empty">None recorded</div>'}
+      <h4 style="margin-top:.8rem">Latest PN order</h4>${lastPn ? `<div class="small">${esc(lastPn.date)} &middot; ${esc(lastPn.access)} &middot; ${fmt(pc.totalKcal)} kcal, ${fmt(C.n(lastPn.aminoAcidG))} g amino acids, GIR ${fmt(pc.girMgKgMin, 1)} mg/kg/min</div>` : '<div class="empty">None</div>'}</div></div>
+      <div class="card"><h4>Recent notes</h4>${C.sortAsc(p.notes).reverse().slice(0, 5).map(n => `<div class="note"><div class="small muted">${esc(n.category)} &middot; ${esc(n.date)}</div>${esc(n.text)}</div>`).join('') || '<div class="empty">None</div>'}</div>
+      <div class="small muted" style="margin-top:.6rem">Generated by CCNM. Monitoring aid only; not a diagnostic or prescribing tool.</div>`;
+  }
+
+  // ----- settings & about -----
+  const SETTING_FIELDS = [
+    ['kLow', 'Potassium low', 'mmol/L'], ['kHigh', 'Potassium high', 'mmol/L'], ['naLow', 'Sodium low', 'mmol/L'], ['naHigh', 'Sodium high', 'mmol/L'],
+    ['phosLow', 'Phosphate low', 'mmol/L'], ['mgLow', 'Magnesium low', 'mmol/L'], ['glucHigh', 'Glucose high', 'mmol/L'], ['tgHigh', 'Triglycerides high', 'mmol/L'],
+    ['girMax', 'PN glucose infusion rate max', 'mg/kg/min'], ['lipidMax', 'PN lipid max', 'g/kg/day'], ['periphOsmMax', 'Peripheral PN osmolarity max', 'mOsm/L'],
+    ['lowIntakePct', 'Low intake threshold', '% of target'], ['highIntakePct', 'High intake threshold', '% of target'], ['labStaleDays', 'Lab considered overdue after', 'days (PN)']
+  ];
+  function renderSettings() {
+    const s = cfg();
+    return `<h2>Settings</h2><div class="card" style="margin-bottom:.75rem"><h3>Alert thresholds</h3><div class="small muted" style="margin-bottom:.5rem">SI units. Defaults are generic starting points &mdash; set them to match your unit's protocols.</div>
+      <div class="fgrid">${SETTING_FIELDS.map(f => `<label class="field"><span>${f[1]} <em>(${f[2]})</em></span><input data-set="${f[0]}" type="number" step="any" value="${esc(s[f[0]])}"></label>`).join('')}</div>
+      <div class="actions"><button class="btn" data-action="reset-settings">Reset defaults</button><button class="btn primary" data-action="save-settings">Save thresholds</button></div></div>
+      <div class="card"><h3>Data</h3><div class="small muted" style="margin-bottom:.6rem">All data stays in this browser (localStorage). Export regularly for backup. Do not enter identifiable patient data unless your organisation's governance allows it.</div>
+      <div class="tools"><button class="btn" data-action="export-json">Export JSON backup</button><button class="btn" data-action="export-csv">Export intake CSV</button><label class="btn">Import JSON<input type="file" id="importFile" accept="application/json,.json" hidden></label><button class="btn" data-action="demo">Load demo patients</button><button class="btn danger" data-action="wipe">Delete all data</button></div></div>`;
+  }
+
+  function renderAbout() {
+    return `<h2>About CCNM</h2><div class="card"><p><b>Critical Care Nutrition Monitor</b> supports monitoring and evaluation of nutrition care in ICU, HDU and renal/dialysis units: targets versus delivery, enteral/oral/parenteral intake, laboratory trends, nutrition-relevant medication and parenteral nutrition prescriptions.</p>
+      <p><b>It is not a diagnostic or prescribing tool.</b> Flags are prompts to review values against thresholds that you configure. Preset energy/protein ranges are generic defaults drawn from common critical-care and renal nutrition guidance; always follow local protocols and clinical judgement.</p>
+      <p class="small muted">Data never leaves your browser. Open source (MIT).</p></div>`;
+  }
+
+  // ---------- actions ----------
+  const COLL_TITLES = { weights: 'weight', intake: 'daily intake', labs: 'lab results', meds: 'medication', notes: 'note' };
+
+  function openColl(coll, rec) {
+    const p = cur(), f = FORMS[coll], editing = !!(rec && rec.id);
+    const values = rec || { date: today() };
+    if (coll === 'meds' && !editing) values.start = today();
+    openForm({
+      title: (editing ? 'Edit ' : 'Add ') + COLL_TITLES[coll], fields: f.fields, values,
+      onSave: d => {
+        if (editing) d.id = rec.id;
+        if (coll === 'intake' && !editing && p.intake.some(x => x.date === d.date)) toast('Replaced the existing entry for ' + d.date);
+        S.upsert(p, coll, d);
+      }
+    });
+  }
+
+  function patientFields(editing) { return FORMS.patients.fields.filter(f => !(f.newOnly && editing)); }
+
+  const handlers = {
+    nav(el) { ui.view = el.dataset.view; ui.pid = null; render(); window.scrollTo(0, 0); },
+    open(el) { ui.view = 'patient'; ui.pid = el.dataset.id; ui.tab = 'overview'; render(); window.scrollTo(0, 0); },
+    tab(el) { ui.tab = el.dataset.tab; render(); },
+    'new-patient'() {
+      openForm({
+        title: 'New patient', fields: patientFields(false), values: { unit: 'ICU', sex: 'M', admitDate: today(), dialysis: 'None' },
+        onSave: d => {
+          const w = d.weightKg; delete d.weightKg;
+          d.targets = { preset: d.unit === 'Renal unit' || d.unit === 'Dialysis unit' ? (d.dialysis === 'CRRT' ? 'crrt' : d.dialysis === 'None' ? 'ckd' : 'hd') : (d.dialysis === 'CRRT' ? 'crrt' : 'icu_acute') };
+          const p = S.addPatient(d);
+          if (w) S.upsert(p, 'weights', { date: d.admitDate, weightKg: w, method: 'Stated' });
+          ui.view = 'patient'; ui.pid = p.id; ui.tab = 'overview';
+        }
+      });
+    },
+    'edit-patient'() {
+      const p = cur();
+      openForm({ title: 'Edit patient', fields: patientFields(true), values: p, onSave: d => { Object.assign(p, d); S.save(); } });
+    },
+    'del-patient'() {
+      const p = cur();
+      if (confirm('Delete patient ' + p.mrn + ' and all their records? This cannot be undone.')) { S.removePatient(p.id); ui.view = 'patients'; ui.pid = null; render(); }
+    },
+    'edit-targets'() {
+      const p = cur(), t = p.targets || {};
+      openForm({
+        title: 'Nutrition targets', values: t,
+        fields: [
+          { name: 'preset', label: 'Reference preset (generic defaults - confirm against local protocol)', type: 'select', full: true,
+            options: Object.keys(C.PRESETS).map(k => ({ v: k, l: C.PRESETS[k].label + ' (' + C.PRESETS[k].kcalMin + '-' + C.PRESETS[k].kcalMax + ' kcal/kg, ' + C.PRESETS[k].protMin + '-' + C.PRESETS[k].protMax + ' g/kg)' })) },
+          num('kcalMin', 'Energy min override (blank = preset)', 'kcal/kg'), num('kcalMax', 'Energy max override', 'kcal/kg'),
+          num('protMin', 'Protein min override (blank = preset)', 'g/kg'), num('protMax', 'Protein max override', 'g/kg'),
+          { name: 'weightBasis', label: 'Weight used for targets', type: 'select', options: ['auto', 'actual', 'ideal', 'adjusted'] },
+          num('fluidLimit', 'Fluid limit', 'mL/day')
+        ],
+        onSave: d => { p.targets = d; S.save(); }
+      });
+    },
+    add(el) { openColl(el.dataset.coll, null); },
+    edit(el) { const p = cur(), rec = p[el.dataset.coll].find(x => x.id === el.dataset.id); if (rec) openColl(el.dataset.coll, Object.assign({}, rec)); },
+    del(el) {
+      if (!confirm('Delete this record?')) return;
+      S.removeChild(cur(), el.dataset.coll, el.dataset.id); render();
+    },
+    'stop-med'(el) { const m = cur().meds.find(x => x.id === el.dataset.id); if (m) { m.stop = today(); S.save(); render(); } },
+    'pn-save'() {
+      const p = cur(), o = pnRead();
+      if (!o.date) return toast('Enter a date');
+      if (!C.n(o.volumeMl) && !C.n(o.dextroseG) && !C.n(o.aminoAcidG)) return toast('Enter at least volume, dextrose or amino acids');
+      S.upsert(p, 'tpn', Object.assign({}, o)); toast('PN order saved'); render();
+    },
+    'pn-intake'() {
+      const p = cur(), o = pnRead(); if (!o.date) return toast('Enter a date');
+      const dw = C.dosingWeight(p), c = C.pnCalc(o, dw ? dw.kg : null);
+      const ex = p.intake.find(x => x.date === o.date) || { date: o.date };
+      S.upsert(p, 'intake', Object.assign({}, ex, { pnKcal: Math.round(c.totalKcal), pnProt: C.n(o.aminoAcidG) || 0 }));
+      toast('Copied to intake log for ' + o.date);
+    },
+    'pn-load'(el) { const o = cur().tpn.find(x => x.id === el.dataset.id); if (o) { ui.pnDraft = Object.assign({}, o, { date: today() }); delete ui.pnDraft.id; render(); window.scrollTo(0, 0); } },
+    'must-save'() {
+      const r = mustRead(); if (!r.complete) return toast('Complete the screening inputs first');
+      S.upsert(cur(), 'notes', { date: today(), category: 'Screening', text: `MUST score ${r.total} (${r.risk} risk): BMI ${r.bmiScore}, weight loss ${r.wlScore}, acute illness ${r.acuteScore}.` });
+      render(); toast('Saved to notes');
+    },
+    print() { window.print(); },
+    'save-settings'() {
+      const s = cfg();
+      document.querySelectorAll('[data-set]').forEach(el => { const v = C.n(el.value); if (v != null) s[el.dataset.set] = v; });
+      S.save(); toast('Thresholds saved');
+    },
+    'reset-settings'() { S.data.settings = Object.assign({}, C.DEFAULT_SETTINGS); S.save(); render(); toast('Defaults restored'); },
+    'export-json'() { download('ccnm-backup-' + today() + '.json', S.exportJson(), 'application/json'); },
+    'export-csv'() {
+      const cols = ['oralKcal', 'enKcal', 'pnKcal', 'propofolMl', 'otherKcal', 'oralProt', 'enProt', 'pnProt', 'fluidIn', 'urineOut', 'otherOut', 'tolerance', 'note'];
+      const q = v => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
+      const lines = [['patient', 'unit', 'date'].concat(cols).join(',')];
+      S.data.patients.forEach(p => C.sortAsc(p.intake).forEach(e => lines.push([q(p.mrn), q(p.unit), q(e.date)].concat(cols.map(c => q(e[c]))).join(','))));
+      download('ccnm-intake-' + today() + '.csv', lines.join('\n'), 'text/csv');
+    },
+    demo() {
+      window.Demo.build(today(), () => S.uid()).forEach(p => S.data.patients.push(S.newPatientShell(p)));
+      S.save(); ui.view = 'patients'; render(); toast('Demo patients added');
+    },
+    wipe() { if (confirm('Delete ALL patients and data in this browser? Export a backup first if needed.')) { S.wipe(); ui.view = 'patients'; render(); } }
+  };
+
+  function download(name, text, type) {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([text], { type }));
+    a.download = name; document.body.appendChild(a); a.click();
+    setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+  }
+
+  // ---------- events ----------
+  document.addEventListener('click', e => {
+    const el = e.target.closest('[data-action]');
+    if (!el) return;
+    const fn = handlers[el.dataset.action];
+    if (fn) { if (el.tagName === 'A') e.preventDefault(); fn(el, e); }
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && e.target.matches('[role="button"][data-action]')) e.target.click();
+  });
+  document.addEventListener('input', e => {
+    const t = e.target;
+    if (t.id === 'search') { ui.search = t.value; renderList(); }
+    else if (t.matches('[data-pn]')) updatePn();
+    else if (t.matches('[data-must]')) updateMust();
+  });
+  document.addEventListener('change', e => {
+    const t = e.target;
+    if (t.id === 'unitFilter') { ui.unit = t.value; renderList(); }
+    else if (t.matches('[data-input="labKey"]')) { ui.labKey = t.value; render(); }
+    else if (t.matches('[data-pn]')) updatePn();
+    else if (t.matches('[data-must]')) updateMust();
+    else if (t.id === 'importFile' && t.files[0]) {
+      const r = new FileReader();
+      r.onload = () => {
+        try {
+          if (!confirm('Replace all current data with this file?')) return;
+          S.importJson(String(r.result)); ui.view = 'patients'; render(); toast('Import complete');
+        } catch (err) { toast('Import failed: ' + err.message); }
+      };
+      r.readAsText(t.files[0]);
+    }
+  });
+
+  S.load();
+  if (!S.save()) toast('Browser storage unavailable: data will not persist.');
+  render();
+})();
+
+</script>
+</body>
+</html>
